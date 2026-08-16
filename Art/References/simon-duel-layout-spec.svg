@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#030817"/>
+      <stop offset="1" stop-color="#07142B"/>
+    </linearGradient>
+    <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".5"/></filter>
+    <style>
+      .label { font: 700 24px Arial, sans-serif; fill: #F7FBFF; letter-spacing: 1px; }
+      .small { font: 600 18px Arial, sans-serif; fill: #B7CAE0; }
+      .measure { font: 600 18px monospace; fill: #78F0FF; }
+      .guide { fill: none; stroke: #20D7ED; stroke-width: 2; stroke-dasharray: 10 8; opacity: .62; }
+      .dim { fill: none; stroke: #78F0FF; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+  <rect x="64" y="96" width="952" height="1704" rx="28" class="guide"/>
+
+  <text x="64" y="64" class="label">SIMON DUEL — GAMEPLAY LAYOUT</text>
+  <text x="1016" y="64" text-anchor="end" class="measure">1080 × 1920</text>
+
+  <!-- Header -->
+  <g filter="url(#shadow)">
+    <rect x="64" y="104" width="952" height="176" rx="36" fill="#0B2242" stroke="#2A527D" stroke-width="3"/>
+  </g>
+  <path d="M96 148h260" stroke="#FF9418" stroke-width="4"/>
+  <path d="M724 148h260" stroke="#20D7ED" stroke-width="4"/>
+  <text x="112" y="188" class="label" fill="#FF9418">PLAYER 1</text>
+  <text x="968" y="188" class="label" text-anchor="end" fill="#20D7ED">PLAYER 2</text>
+  <g fill="#FF9418"><circle cx="136" cy="232" r="17"/><circle cx="186" cy="232" r="17"/><circle cx="236" cy="232" r="17" opacity=".25"/></g>
+  <g fill="#20D7ED"><circle cx="844" cy="232" r="17" opacity=".25"/><circle cx="894" cy="232" r="17"/><circle cx="944" cy="232" r="17"/></g>
+  <path d="M540 138l42 24v48l-42 24-42-24v-48z" fill="#07142B" stroke="#FF9418" stroke-width="4"/>
+  <text x="540" y="196" text-anchor="middle" class="label">1</text>
+
+  <!-- State banner -->
+  <rect x="128" y="304" width="824" height="128" rx="32" fill="#12345C" stroke="#FF9418" stroke-width="4"/>
+  <text x="540" y="356" text-anchor="middle" class="small">CURRENT STATE / ACTIVE TWIST</text>
+  <text x="540" y="402" text-anchor="middle" class="label">YOUR TURN</text>
+
+  <!-- Ring and board -->
+  <circle cx="540" cy="860" r="412" fill="none" stroke="#2A527D" stroke-width="12"/>
+  <path d="M310 518 A412 412 0 0 1 770 518" fill="none" stroke="#FF9418" stroke-width="12" stroke-linecap="round" filter="url(#glow-orange)"/>
+  <circle cx="540" cy="860" r="392" fill="#07142B" stroke="#12345C" stroke-width="12"/>
+
+  <g filter="url(#shadow)">
+    <path d="M184 574 Q184 520 238 520 H498 Q516 520 516 538 V820 Q516 836 500 836 H232 Q184 836 184 788 Z" fill="#FF5A52" stroke="#FF9188" stroke-width="8"/>
+    <path d="M564 538 Q564 520 582 520 H842 Q896 520 896 574 V788 Q896 836 848 836 H580 Q564 836 564 820 Z" fill="#FFC62E" stroke="#FFE477" stroke-width="8"/>
+    <path d="M184 932 Q184 884 232 884 H500 Q516 884 516 900 V1182 Q516 1200 498 1200 H238 Q184 1200 184 1146 Z" fill="#42D79A" stroke="#87EBC2" stroke-width="8"/>
+    <path d="M564 900 Q564 884 580 884 H848 Q896 884 896 932 V1146 Q896 1200 842 1200 H582 Q564 1200 564 1182 Z" fill="#2B9DF4" stroke="#79C9FF" stroke-width="8"/>
+  </g>
+  <circle cx="350" cy="678" r="58" fill="none" stroke="#F7FBFF" stroke-width="20"/>
+  <path d="M730 614l66 120H664z" fill="none" stroke="#07142B" stroke-width="20" stroke-linejoin="round"/>
+  <rect x="292" y="976" width="116" height="116" rx="10" fill="none" stroke="#07142B" stroke-width="20"/>
+  <path d="M754 963l24 52 58 7-43 40 12 57-51-29-51 29 12-57-43-40 58-7z" fill="none" stroke="#F7FBFF" stroke-width="18" stroke-linejoin="round"/>
+
+  <!-- Twist dock -->
+  <rect x="96" y="1320" width="888" height="208" rx="36" fill="#0B2242" stroke="#2A527D" stroke-width="3"/>
+  <text x="132" y="1364" class="small">TWIST DOCK</text>
+  <rect x="128" y="1390" width="136" height="112" rx="24" fill="#07142B" stroke="#FF9418" stroke-width="5"/>
+  <path d="M164 1450a32 32 0 1 1 24 30M228 1442a32 32 0 1 0-24-30" fill="none" stroke="#FF9418" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="540" cy="1450" r="13" fill="#FF9418"/><circle cx="584" cy="1450" r="13" fill="#FF9418"/><circle cx="628" cy="1450" r="13" fill="#2A527D"/>
+  <text x="948" y="1460" text-anchor="end" class="label">2 / 3 CHARGE</text>
+
+  <!-- Progress and footer -->
+  <rect x="160" y="1560" width="760" height="104" rx="30" fill="#07142B" stroke="#2A527D" stroke-width="2"/>
+  <text x="540" y="1608" text-anchor="middle" class="small">SEQUENCE LENGTH</text>
+  <text x="540" y="1650" text-anchor="middle" class="label">8</text>
+  <rect x="64" y="1696" width="952" height="104" rx="32" fill="#0B2242" stroke="#2A527D" stroke-width="2"/>
+  <text x="112" y="1760" class="small">HELP</text>
+  <text x="968" y="1760" text-anchor="end" class="small">PAUSE</text>
+
+  <!-- Dimension callouts -->
+  <path d="M64 1840v30M1016 1840v30M64 1855h952" class="dim"/>
+  <path d="M64 1855l18-9v18zM1016 1855l-18-9v18z" fill="#78F0FF"/>
+  <text x="540" y="1890" text-anchor="middle" class="measure">952 px SAFE CONTENT WIDTH • 64 px SIDE INSET</text>
+
+  <path d="M148 1274v26M932 1274v26M148 1287h784" class="dim"/>
+  <path d="M148 1287l18-9v18zM932 1287l-18-9v18z" fill="#78F0FF"/>
+  <text x="540" y="1310" text-anchor="middle" class="measure">784 px BOARD • 824 px RING</text>
+
+  <text x="1028" y="100" class="measure" transform="rotate(90 1028 100)">SAFE AREA START 96 px</text>
+</svg>

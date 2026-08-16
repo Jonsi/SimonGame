@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#030817"/>
+      <stop offset="1" stop-color="#07142B"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity=".35"/>
+    </filter>
+    <style>
+      .title { font: 800 58px Arial, sans-serif; fill: #F7FBFF; letter-spacing: 2px; }
+      .subtitle { font: 600 22px Arial, sans-serif; fill: #B7CAE0; }
+      .section { font: 700 24px Arial, sans-serif; fill: #F7FBFF; letter-spacing: 1.5px; }
+      .name { font: 700 20px Arial, sans-serif; fill: #F7FBFF; }
+      .hex { font: 600 18px monospace; fill: #B7CAE0; }
+      .note { font: 500 18px Arial, sans-serif; fill: #8199B5; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="1420" cy="-40" r="360" fill="#20D7ED" opacity=".035"/>
+  <circle cx="80" cy="1040" r="420" fill="#FF9418" opacity=".035"/>
+
+  <text x="80" y="88" class="title">SIMON DUEL — COLOR SYSTEM</text>
+  <text x="82" y="126" class="subtitle">Exact production palette • 1080 × 1920 portrait baseline • Color is never the only cue</text>
+
+  <text x="80" y="190" class="section">FOUNDATION</text>
+  <g filter="url(#shadow)">
+    <rect x="80" y="218" width="210" height="122" rx="24" fill="#030817" stroke="#2A527D"/>
+    <rect x="310" y="218" width="210" height="122" rx="24" fill="#050B1D" stroke="#2A527D"/>
+    <rect x="540" y="218" width="210" height="122" rx="24" fill="#07142B" stroke="#2A527D"/>
+    <rect x="770" y="218" width="210" height="122" rx="24" fill="#0B2242" stroke="#2A527D"/>
+    <rect x="1000" y="218" width="210" height="122" rx="24" fill="#12345C" stroke="#2A527D"/>
+    <rect x="1230" y="218" width="210" height="122" rx="24" fill="#2A527D" stroke="#2A527D"/>
+  </g>
+  <g>
+    <text x="80" y="372" class="name">Night 1000</text><text x="80" y="400" class="hex">#030817</text>
+    <text x="310" y="372" class="name">Navy 950</text><text x="310" y="400" class="hex">#050B1D</text>
+    <text x="540" y="372" class="name">Navy 900</text><text x="540" y="400" class="hex">#07142B</text>
+    <text x="770" y="372" class="name">Navy 800</text><text x="770" y="400" class="hex">#0B2242</text>
+    <text x="1000" y="372" class="name">Navy 700</text><text x="1000" y="400" class="hex">#12345C</text>
+    <text x="1230" y="372" class="name">Stroke 500</text><text x="1230" y="400" class="hex">#2A527D</text>
+  </g>
+
+  <text x="80" y="464" class="section">PAD IDENTITIES</text>
+  <g filter="url(#shadow)">
+    <rect x="80" y="492" width="330" height="164" rx="32" fill="#FF5A52"/>
+    <circle cx="245" cy="574" r="44" fill="none" stroke="#F7FBFF" stroke-width="16"/>
+    <rect x="438" y="492" width="330" height="164" rx="32" fill="#FFC62E"/>
+    <path d="M603 526 L651 614 L555 614 Z" fill="none" stroke="#07142B" stroke-width="16" stroke-linejoin="round"/>
+    <rect x="796" y="492" width="330" height="164" rx="32" fill="#42D79A"/>
+    <rect x="917" y="530" width="88" height="88" rx="8" fill="none" stroke="#07142B" stroke-width="16"/>
+    <rect x="1154" y="492" width="330" height="164" rx="32" fill="#2B9DF4"/>
+    <path d="M1319 526 L1334 558 L1369 562 L1343 586 L1350 621 L1319 603 L1288 621 L1295 586 L1269 562 L1304 558 Z" fill="none" stroke="#F7FBFF" stroke-width="14" stroke-linejoin="round"/>
+  </g>
+  <g>
+    <text x="80" y="690" class="name">Circle / Coral</text><text x="80" y="718" class="hex">#FF5A52</text>
+    <text x="438" y="690" class="name">Triangle / Sun</text><text x="438" y="718" class="hex">#FFC62E</text>
+    <text x="796" y="690" class="name">Square / Mint</text><text x="796" y="718" class="hex">#42D79A</text>
+    <text x="1154" y="690" class="name">Star / Electric</text><text x="1154" y="718" class="hex">#2B9DF4</text>
+  </g>
+
+  <text x="80" y="784" class="section">PLAYER + FEEDBACK</text>
+  <g filter="url(#shadow)">
+    <rect x="80" y="812" width="210" height="92" rx="24" fill="#FF9418"/>
+    <rect x="310" y="812" width="210" height="92" rx="24" fill="#20D7ED"/>
+    <rect x="540" y="812" width="210" height="92" rx="24" fill="#A664FF"/>
+    <rect x="770" y="812" width="210" height="92" rx="24" fill="#73E36A"/>
+    <rect x="1000" y="812" width="210" height="92" rx="24" fill="#FF4658"/>
+    <rect x="1230" y="812" width="210" height="92" rx="24" fill="#FFB020"/>
+  </g>
+  <g>
+    <text x="80" y="936" class="name">Player 1</text><text x="80" y="964" class="hex">#FF9418</text>
+    <text x="310" y="936" class="name">Player 2</text><text x="310" y="964" class="hex">#20D7ED</text>
+    <text x="540" y="936" class="name">Twist</text><text x="540" y="964" class="hex">#A664FF</text>
+    <text x="770" y="936" class="name">Success</text><text x="770" y="964" class="hex">#73E36A</text>
+    <text x="1000" y="936" class="name">Error</text><text x="1000" y="964" class="hex">#FF4658</text>
+    <text x="1230" y="936" class="name">Warning</text><text x="1230" y="964" class="hex">#FFB020</text>
+  </g>
+</svg>
