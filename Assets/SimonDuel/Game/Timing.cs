@@ -19,5 +19,12 @@ namespace SimonDuel.Game
         public float shiftSeconds = 0.65f;
         public float echoGapSeconds = 0.08f;
         public float demoStepSeconds = 0.25f;
+        public float slowPlaybackFactor = 1.4f;
+
+        [Header("Tutorial")]
+        public float tutorialLineSeconds = 1.9f;
+        public float tutorialStepSeconds = 0.5f;
+        public float tutorialGapSeconds = 0.18f;
+        public float tutorialPauseSeconds = 0.5f;
     }
 }

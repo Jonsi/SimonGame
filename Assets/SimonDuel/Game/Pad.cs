@@ -13,6 +13,8 @@ namespace SimonDuel.Game
         [SerializeField] Image depth;
         [SerializeField] Image gloss;
         [SerializeField] Image rim;
+        [SerializeField] Image halo;
+        [SerializeField] Image ripple;
         [SerializeField] Image symbol;
         [SerializeField] AudioSource tone;
 
@@ -20,6 +22,7 @@ namespace SimonDuel.Game
         PadLook look;
         Vector2 center;
         float pressedAt = float.NegativeInfinity;
+        float rippleAt = float.NegativeInfinity;
         float lightSeconds;
         float peakScale;
         float depthChange;
@@ -35,9 +38,10 @@ namespace SimonDuel.Game
         public int Slot => slot;
         public int HomeSlot => (int)id;
 
-        public void Setup(Feel settings)
+        public void Setup(Feel settings, float volume)
         {
             feel = settings;
+            tone.volume = volume;
             look = feel.looks[(int)id];
 
             // Home slots, left to right and top to bottom: Circle, Triangle, Square, Star.
@@ -49,6 +53,8 @@ namespace SimonDuel.Game
             depth.color = look.depth;
             rim.rectTransform.offsetMin = Vector2.one * -feel.rimOutset;
             rim.rectTransform.offsetMax = Vector2.one * feel.rimOutset;
+            halo.rectTransform.offsetMin = Vector2.one * -feel.haloOutset;
+            halo.rectTransform.offsetMax = Vector2.one * feel.haloOutset;
             gloss.rectTransform.anchoredPosition = new Vector2(0f, -feel.glossInset);
             gloss.color = new Color(1f, 1f, 1f, feel.glossOpacity);
             symbol.color = feel.symbolColor;
@@ -90,6 +96,7 @@ namespace SimonDuel.Game
         // A player's press: dips into the board.
         public void Press()
         {
+            rippleAt = Time.unscaledTime;
             Light(feel.lightSettleSeconds, feel.pressedScale, feel.restingDepth - feel.pressedDepth, 0f, Color.white);
         }
 
@@ -113,9 +120,9 @@ namespace SimonDuel.Game
         void Light(float seconds, float scale, float depthDrop, float shake, Color rimTint)
         {
             lightSeconds = seconds;
-            peakScale = scale;
-            depthChange = depthDrop;
-            shakePixels = shake;
+            peakScale = GameSettings.ReduceMotion ? 1f : scale;
+            depthChange = GameSettings.ReduceMotion ? 0f : depthDrop;
+            shakePixels = GameSettings.ReduceMotion ? 0f : shake;
             rimColor = rimTint;
             pressedAt = Time.unscaledTime;
             PlayToneOnly();
@@ -133,6 +140,14 @@ namespace SimonDuel.Game
         {
             Show(Time.unscaledTime - pressedAt);
             Slide();
+        }
+
+        void ShowRipple()
+        {
+            float progress = Mathf.Clamp01((Time.unscaledTime - rippleAt) / feel.rippleSeconds);
+            ripple.enabled = progress < 1f && !GameSettings.ReduceMotion;
+            ripple.color = new Color(1f, 1f, 1f, (1f - progress) * feel.rippleOpacity);
+            ripple.rectTransform.localScale = Vector3.one * (1f + progress * feel.rippleGrowth);
         }
 
         void Slide()
@@ -164,6 +179,8 @@ namespace SimonDuel.Game
             float settled = Mathf.SmoothStep(0f, 1f, sincePress / lightSeconds);
             shape.color = Color.Lerp(look.lit, look.rest, settled);
             rim.color = new Color(rimColor.r, rimColor.g, rimColor.b, 1f - settled);
+            halo.color = new Color(look.lit.r, look.lit.g, look.lit.b, (1f - settled) * feel.haloOpacity);
+            ShowRipple();
         }
     }
 }

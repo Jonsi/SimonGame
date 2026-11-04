@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using SimonDuel.Rules;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,6 +26,12 @@ namespace SimonDuel.Game
         [SerializeField] Text rematchLabel;
         [SerializeField] GameObject menu;
         [SerializeField] MenuButton[] menuButtons;
+        [SerializeField] Button openSettings;
+        [SerializeField] GameObject settingsCard;
+        [SerializeField] Button pause;
+        [SerializeField] Button resume;
+        [SerializeField] Button quit;
+        [SerializeField] Button howToPlay;
 
         static readonly Color Idle = new Color32(0x2A, 0x52, 0x7D, 0xFF);
 
@@ -49,11 +56,44 @@ namespace SimonDuel.Game
             menu.SetActive(show);
         }
 
+        public void ListenToPause(Action onPause, Action onResume, Action onQuit, Action onHowToPlay)
+        {
+            howToPlay.onClick.AddListener(() => onHowToPlay());
+            pause.onClick.AddListener(() => onPause());
+            resume.onClick.AddListener(() => onResume());
+            quit.onClick.AddListener(() => onQuit());
+            openSettings.onClick.AddListener(() => settingsCard.SetActive(true));
+        }
+
+        public bool IsOverPauseButton(Vector2 screenPoint)
+        {
+            return RectTransformUtility.RectangleContainsScreenPoint((RectTransform)pause.transform, screenPoint);
+        }
+
+        public void ShowRingError()
+        {
+            timerRing.color = feel.wrongRimColor;
+            timerRing.fillAmount = 1f;
+        }
+
         public void ShowNames(string[] names, string secondNumber, bool showSecondPlayer)
         {
+            foreach (var player in players) player.ResetScore();
             players[0].ShowName(names[0], "1");
             players[1].ShowName(names[1], secondNumber);
+            players[0].gameObject.SetActive(true);
             players[1].gameObject.SetActive(showSecondPlayer);
+            players[0].ShowTwistArea(showSecondPlayer);
+        }
+
+        public void ShowTutorialLook()
+        {
+            foreach (var player in players) player.gameObject.SetActive(false);
+            length.text = "";
+            bannerLine.color = feel.playerColors[0];
+            timerRing.color = feel.playerColors[0];
+            timerRing.fillClockwise = true;
+            timerRing.fillAmount = 1f;
         }
 
         public void ListenToTwists(Action onUse, Action onKeep)
@@ -65,7 +105,7 @@ namespace SimonDuel.Game
         {
             for (int i = 0; i < players.Length; i++)
             {
-                players[i].Show(referee.Score(i), activePlayer == i, feel.playerColors[i], Idle);
+                players[i].Show(referee.Score(i), activePlayer == i, feel.playerColors[i], Idle, feel);
                 players[i].ShowTwist(referee.Charge(i), referee.HeldTwist(i), feel.twistColor, Idle, offeredTo == i);
             }
             var color = activePlayer >= 0 ? feel.playerColors[activePlayer] : Idle;
@@ -107,6 +147,23 @@ namespace SimonDuel.Game
             rematchLabel.text = againLabel;
             notes.gameObject.SetActive(notesSaved > 0);
             notesLabel.text = $"Download match notes ({notesSaved})";
+            StartCoroutine(RevealResult());
+        }
+
+        IEnumerator RevealResult()
+        {
+            var card = resultCover.GetComponent<CanvasGroup>();
+            var rect = (RectTransform)resultCover.transform;
+            float seconds = GameSettings.ReduceMotion ? 0f : feel.resultSeconds;
+            for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+            {
+                float progress = t / seconds;
+                card.alpha = progress;
+                rect.localScale = Vector3.one * Mathf.Lerp(feel.resultStartScale, 1f, progress);
+                yield return null;
+            }
+            card.alpha = 1f;
+            rect.localScale = Vector3.one;
         }
 
         public void HideResult()

@@ -13,6 +13,7 @@ namespace SimonDuel.Game
         [SerializeField] Feel feel;
         [SerializeField] Pad[] pads;
         [SerializeField] DuelRunner runner;
+        [SerializeField] AudioMix mix;
 
         // Which slot is next going clockwise: top-left, top-right, bottom-right, bottom-left.
         static readonly int[] NextClockwise = { 1, 3, 0, 2 };
@@ -27,7 +28,7 @@ namespace SimonDuel.Game
         {
             board = (RectTransform)transform;
             board.anchoredPosition = new Vector2(0f, -feel.boardDropFromCenter);
-            foreach (var pad in pads) pad.Setup(feel);
+            foreach (var pad in pads) pad.Setup(feel, mix.pads);
         }
 
         void OnEnable()
@@ -82,9 +83,10 @@ namespace SimonDuel.Game
 
         void OnPointerPress(InputAction.CallbackContext context)
         {
+            var pointer = (Pointer)context.control.device;
+            if (runner.PressIsOnPauseButton(pointer.position.ReadValue())) return;
             if (runner.PressAnywhere()) return;
 
-            var pointer = (Pointer)context.control.device;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(board, pointer.position.ReadValue(), null, out var point);
             foreach (var pad in pads)
             {

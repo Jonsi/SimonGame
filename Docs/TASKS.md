@@ -191,13 +191,13 @@ You can try at the end: the game looking and moving like the Art Bible, on your 
 - [ ] **7.03** Fonts in, with the type sizes from the Art Bible.
 - [ ] **7.04** Add the animation add-on (PrimeTween).
 - [ ] **7.05** Real pads from Figma, in layers, with every state: resting, lit, pressed, right, wrong, off, add one.
-- [ ] **7.06** Tap squash 70 ms in and 110 ms out; playback glow 420 ms; right-tap ripple; wrong-tap shake.
-- [ ] **7.07** Glow as a soft halo under each pad, faded and scaled. No full-screen glow effect.
+- [x] **7.06** Tap squash 70 ms in and 110 ms out; playback glow 420 ms; right-tap ripple; wrong-tap shake. Done 4 Nov 2026 in code; the shapes are still stand-ins.
+- [x] **7.07** Glow as a soft halo under each pad, faded and scaled. No full-screen glow effect. Done 4 Nov 2026.
 - [ ] **7.08** The ring: timer runs clockwise, Reverse runs back with arrowheads; Player 1 solid, Player 2 segmented.
 - [ ] **7.09** Real top bar, banners, Twist slot and panels.
 - [ ] **7.10** Shift orbit (650 ms) with the less-motion version.
-- [ ] **7.11** Small particle bursts within the Art Bible counts.
-- [ ] **7.12** Hand-over sweep, score pip pop, result card motion, win confetti (skippable).
+- [x] **7.11** Small particle bursts within the Art Bible counts. Done 4 Nov 2026.
+- [x] **7.12** Hand-over sweep, score pip pop, result card motion, win confetti (skippable). Done 4 Nov 2026.
 - [ ] **7.13** "Reduce motion" setting works everywhere.
 - [ ] **7.14** "High contrast" setting swaps to the high-contrast colors.
 - [ ] **7.15** Color-blind presets that shift colors but keep the symbols.
@@ -215,10 +215,10 @@ You can try at the end: the whole game from launch: title, home, setup, play, re
 - [ ] **8.02** Title screen; the very first launch goes straight into the tutorial.
 - [ ] **8.03** Home: Computer, Same phone, Online, plus Sparks and level.
 - [ ] **8.04** Setup: two names for same phone; a level for the computer.
-- [ ] **8.05** Pause card.
-- [ ] **8.06** Settings: volumes, buzz, reduce motion, high contrast, color presets, playback speed, input time, language.
-- [ ] **8.07** Learn-by-playing tutorial: watch, repeat, add one, see the other side repeat, then Reverse.
-- [ ] **8.08** "How to play" replays the tutorial demos.
+- [x] **8.05** Pause card. Done 4 Nov 2026: pause button, "Carry on" and "Quit to menu".
+- [ ] **8.06** Settings: volumes, buzz, reduce motion, high contrast, color presets, playback speed, input time, language. Started 4 Nov 2026: sound on/off, reduce motion and slower patterns are in.
+- [x] **8.07** Learn-by-playing tutorial: watch, repeat, add one, see the other side repeat, then Reverse. Done 4 Nov 2026: runs once on first launch.
+- [x] **8.08** "How to play" replays the tutorial demos. Done 4 Nov 2026: "How to play" on the menu replays it.
 - [ ] **8.09** Save on the phone: settings, names, stats, safe across app updates.
 - [ ] **8.10** All text in one table, ready for other languages; English first.
 - [ ] **8.11** Basic usage counts for the first session, with no tracking (safe for kids).

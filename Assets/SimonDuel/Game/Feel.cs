@@ -26,6 +26,30 @@ namespace SimonDuel.Game
         public float squashOutSeconds = 0.11f;
         public float lightSettleSeconds = 0.42f;
 
+        [Header("Glow and ripple")]
+        public float haloOutset = 46f;
+        public float haloOpacity = 0.6f;
+        public float rippleSeconds = 0.26f;
+        public float rippleGrowth = 0.16f;
+        public float rippleOpacity = 0.55f;
+
+        [Header("Flying pieces")]
+        public int effectPieces = 120;
+        public int burstPieces = 12;
+        public int wrongBurstPieces = 20;
+        public float burstSpeed = 420f;
+        public float burstSeconds = 0.45f;
+        public int confettiPieces = 90;
+        public float confettiSeconds = 3f;
+        public float confettiGravity = 260f;
+
+        [Header("Screens")]
+        public float handOverSeconds = 0.45f;
+        public float pipPopSeconds = 0.5f;
+        public float pipPopScale = 1.7f;
+        public float resultSeconds = 0.42f;
+        public float resultStartScale = 0.92f;
+
         [Header("Pattern playback and slips")]
         public float playbackScale = 1.04f;
         public float wrongShakePixels = 16f;

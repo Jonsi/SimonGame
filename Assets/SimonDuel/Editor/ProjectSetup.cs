@@ -27,6 +27,7 @@ namespace SimonDuel.EditorTools
         const string DuelRulesPath = "Assets/SimonDuel/Settings/DuelRules.asset";
         const string TimingPath = "Assets/SimonDuel/Settings/Timing.asset";
         const string ComputerLevelsPath = "Assets/SimonDuel/Settings/ComputerLevels.asset";
+        const string AudioMixPath = "Assets/SimonDuel/Settings/AudioMix.asset";
         const string StandInArt = "Assets/SimonDuel/Art/StandIn/";
         const string StandInAudio = "Assets/SimonDuel/Audio/StandIn/";
 
@@ -154,6 +155,7 @@ namespace SimonDuel.EditorTools
             var rules = LoadSettings<DuelRules>(DuelRulesPath);
             var timing = LoadSettings<Timing>(TimingPath);
             var levels = LoadSettings<ComputerLevels>(ComputerLevelsPath);
+            var mix = LoadSettings<AudioMix>(AudioMixPath);
 
             var board = BuildBoard(canvasGo.transform, feel, out var timerRing);
             var banner = BuildBanner(canvasGo.transform, font, out var bannerText);
@@ -169,12 +171,26 @@ namespace SimonDuel.EditorTools
             version.alignment = TextAnchor.LowerRight;
             Stretch(version.rectTransform, new Vector2(0, 0), new Vector2(1, 0.06f), new Vector2(-32, 0));
 
+            var pause = MakeButton(canvasGo.transform, "Pause", "", font, 20, Raised, TextSecondary);
+            var pauseRect = (RectTransform)pause.transform;
+            pauseRect.anchorMin = pauseRect.anchorMax = new Vector2(0f, 1f);
+            pauseRect.anchoredPosition = new Vector2(70, -62);
+            pauseRect.sizeDelta = new Vector2(84, 84);
+            var pauseIcon = MakeImage(pause.transform, "Icon", LoadSprite("pause.png"));
+            pauseIcon.color = TextSecondary;
+            Place(pauseIcon.rectTransform, 0, 0, 44, 44);
+
             var paused = BuildCover(canvasGo.transform, "Paused", 1f);
-            var pausedText = MakeText(paused.transform, "Text", "Paused: click to carry on", font, 54, TextSecondary);
-            Stretch(pausedText.rectTransform, Vector2.zero, Vector2.one);
+            var pausedText = MakeText(paused.transform, "Text", "Paused", font, 90, TextSecondary);
+            Place(pausedText.rectTransform, 0, 150, 800, 130);
+            var resume = MakeButton(paused.transform, "Resume", "CARRY ON", font, 44, Player1, Cavity);
+            Place((RectTransform)resume.transform, 0, -10, 460, 110);
+            var quit = MakeButton(paused.transform, "Quit", "Quit to menu", font, 30, Raised, TextSecondary);
+            Place((RectTransform)quit.transform, 0, -140, 320, 72);
             paused.SetActive(false);
 
             var result = BuildCover(canvasGo.transform, "MatchResult", 1f);
+            result.AddComponent<CanvasGroup>();
             var resultTitle = MakeText(result.transform, "Title", "PLAYER 1 WINS", font, 110, Color.white);
             Place(resultTitle.rectTransform, 0, 210, 1400, 150);
             var resultScore = MakeText(result.transform, "Score", "2 - 1", font, 90, TextSecondary);
@@ -189,6 +205,11 @@ namespace SimonDuel.EditorTools
             result.SetActive(false);
 
             var menu = BuildMenu(canvasGo.transform, font, levels, out var menuButtons);
+            var openSettings = MakeButton(menu.transform, "OpenSettings", "SETTINGS", font, 26, Panel, TextSecondary);
+            Place((RectTransform)openSettings.transform, 150, -440, 280, 68);
+            var howToPlay = MakeButton(menu.transform, "HowToPlay", "HOW TO PLAY", font, 26, Panel, TextSecondary);
+            Place((RectTransform)howToPlay.transform, -150, -440, 280, 68);
+            var settingsCard = BuildSettingsCard(menu.transform, font);
             menu.SetActive(false);
 
             var cover = BuildCover(canvasGo.transform, "TapToStart", 0.9f);
@@ -208,13 +229,25 @@ namespace SimonDuel.EditorTools
             Wire(duelScreen, ("feel", feel), ("banner", bannerText), ("bannerLine", banner), ("length", length), ("timerRing", timerRing),
                 ("pausedCover", paused), ("resultCover", result), ("resultTitle", resultTitle), ("resultScore", resultScore),
                 ("rematch", rematch), ("home", home), ("notes", notes), ("notesLabel", notesLabel),
-                ("rematchLabel", rematch.GetComponentInChildren<Text>()), ("menu", menu));
+                ("rematchLabel", rematch.GetComponentInChildren<Text>()), ("menu", menu), ("openSettings", openSettings),
+                ("settingsCard", settingsCard), ("pause", pause), ("resume", resume), ("quit", quit), ("howToPlay", howToPlay));
             WireList(duelScreen, "players", panels);
             WireList(duelScreen, "menuButtons", menuButtons);
 
             var runner = canvasGo.AddComponent<DuelRunner>();
-            Wire(runner, ("rules", rules), ("computerLevels", levels), ("timing", timing), ("board", board), ("screen", duelScreen), ("boot", boot));
-            Wire(board, ("runner", runner));
+            var soundBoard = BuildSoundBoard(canvasGo, mix);
+            var tutorialScript = canvasGo.AddComponent<Tutorial>();
+            Wire(tutorialScript, ("board", board), ("screen", duelScreen), ("sounds", soundBoard), ("timing", timing));
+
+            var effectsGo = new GameObject("Effects", typeof(RectTransform));
+            effectsGo.transform.SetParent(canvasGo.transform, false);
+            Stretch((RectTransform)effectsGo.transform, Vector2.zero, Vector2.one);
+            var effects = effectsGo.AddComponent<Effects>();
+            Wire(effects, ("feel", feel), ("piece", LoadSprite("disc.png")));
+
+            Wire(runner, ("rules", rules), ("computerLevels", levels), ("timing", timing), ("board", board), ("screen", duelScreen), ("boot", boot),
+                ("sounds", soundBoard), ("effects", effects), ("feel", feel), ("tutorial", tutorialScript));
+            Wire(board, ("runner", runner), ("mix", mix));
 
             System.IO.Directory.CreateDirectory("Assets/SimonDuel/Scenes");
             EditorSceneManager.SaveScene(scene, AppScenePath);
@@ -255,6 +288,40 @@ namespace SimonDuel.EditorTools
             for (int i = 0; i < values.Length; i++)
                 list.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static SoundBoard BuildSoundBoard(GameObject canvas, AudioMix mix)
+        {
+            var source = canvas.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            var board = canvas.AddComponent<SoundBoard>();
+            Wire(board, ("source", source), ("mix", mix));
+            var names = new[] { "done", "wrong", "twist", "point", "win", "turn1", "turn2", "click" };
+            WireList(board, "clips", System.Array.ConvertAll<string, Object>(names, n => LoadTone($"fx_{n}.wav")));
+            return board;
+        }
+
+        static GameObject BuildSettingsCard(Transform menu, Font font)
+        {
+            var card = BuildCover(menu, "Settings", 1f);
+            var title = MakeText(card.transform, "Title", "SETTINGS", font, 70, Color.white);
+            title.raycastTarget = false;
+            Place(title.rectTransform, 0, 250, 800, 100);
+
+            var sound = MakeButton(card.transform, "Sound", "SOUND", font, 32, Raised, Color.white);
+            Place((RectTransform)sound.transform, 0, 110, 620, 92);
+            var motion = MakeButton(card.transform, "ReduceMotion", "REDUCE MOTION", font, 32, Raised, Color.white);
+            Place((RectTransform)motion.transform, 0, 0, 620, 92);
+            var slow = MakeButton(card.transform, "SlowPlayback", "SLOWER PATTERNS", font, 32, Raised, Color.white);
+            Place((RectTransform)slow.transform, 0, -110, 620, 92);
+            var close = MakeButton(card.transform, "Close", "BACK", font, 34, Player1, Cavity);
+            Place((RectTransform)close.transform, 0, -250, 320, 92);
+
+            var settings = card.AddComponent<SettingsCard>();
+            Wire(settings, ("sound", sound), ("reduceMotion", motion), ("slowPlayback", slow), ("close", close));
+            card.SetActive(false);
+            return card;
         }
 
         static GameObject BuildMenu(Transform canvas, Font font, ComputerLevels levels, out MenuButton[] buttons)
@@ -372,6 +439,7 @@ namespace SimonDuel.EditorTools
             var go = new GameObject(id.ToString(), typeof(RectTransform), typeof(AudioSource));
             go.transform.SetParent(board, false);
 
+            var halo = MakeImage(go.transform, "Halo", LoadSprite("glow.png"));
             var depth = MakeImage(go.transform, "Depth", shapeSprite);
             var face = new GameObject("Face", typeof(RectTransform));
             face.transform.SetParent(go.transform, false);
@@ -381,6 +449,8 @@ namespace SimonDuel.EditorTools
             gloss.rectTransform.anchorMin = gloss.rectTransform.anchorMax = gloss.rectTransform.pivot = new Vector2(0.5f, 1f);
             gloss.rectTransform.sizeDelta = new Vector2(feel.padSize.x * 0.82f, feel.padSize.y * 0.3f);
             var rim = MakeImage(face.transform, "Rim", LoadSprite("pad_rim.png"));
+            var ripple = MakeImage(face.transform, "Ripple", LoadSprite("pad_rim.png"));
+            ripple.transform.SetAsFirstSibling();
             var symbol = MakeImage(face.transform, "Symbol", LoadSprite($"symbol_{name}.png"));
             symbol.rectTransform.anchorMin = symbol.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
 
@@ -397,6 +467,8 @@ namespace SimonDuel.EditorTools
             so.FindProperty("depth").objectReferenceValue = depth;
             so.FindProperty("gloss").objectReferenceValue = gloss;
             so.FindProperty("rim").objectReferenceValue = rim;
+            so.FindProperty("halo").objectReferenceValue = halo;
+            so.FindProperty("ripple").objectReferenceValue = ripple;
             so.FindProperty("symbol").objectReferenceValue = symbol;
             so.FindProperty("tone").objectReferenceValue = tone;
             so.ApplyModifiedPropertiesWithoutUndo();

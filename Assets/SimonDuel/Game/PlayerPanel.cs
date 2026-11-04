@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using SimonDuel.Rules;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,6 +31,12 @@ namespace SimonDuel.Game
             keep.onClick.AddListener(() => onKeep());
         }
 
+        public void ShowTwistArea(bool show)
+        {
+            twistCard.gameObject.SetActive(show);
+            foreach (var pip in chargePips) pip.gameObject.SetActive(show);
+        }
+
         public void ShowTwist(int charge, TwistId held, Color twistColor, Color idle, bool offered)
         {
             for (int i = 0; i < chargePips.Length; i++)
@@ -41,12 +48,34 @@ namespace SimonDuel.Game
             keep.gameObject.SetActive(offered);
         }
 
-        public void Show(int score, bool active, Color color, Color idle)
+        int shownScore;
+
+        public void ResetScore()
         {
+            shownScore = 0;
+        }
+
+        public void Show(int score, bool active, Color color, Color idle, Feel feel)
+        {
+            if (score > shownScore && gameObject.activeInHierarchy && !GameSettings.ReduceMotion)
+                StartCoroutine(PopPip(pips[score - 1].rectTransform, feel));
+            shownScore = score;
+
             outline.color = active ? color : idle;
             yourTurn.SetActive(active);
             for (int i = 0; i < pips.Length; i++)
                 pips[i].color = i < score ? color : idle;
+        }
+
+        IEnumerator PopPip(RectTransform pip, Feel feel)
+        {
+            for (float t = 0f; t < feel.pipPopSeconds; t += Time.unscaledDeltaTime)
+            {
+                float progress = t / feel.pipPopSeconds;
+                pip.localScale = Vector3.one * Mathf.Lerp(feel.pipPopScale, 1f, progress * progress);
+                yield return null;
+            }
+            pip.localScale = Vector3.one;
         }
     }
 }

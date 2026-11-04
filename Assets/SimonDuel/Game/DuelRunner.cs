@@ -18,11 +18,15 @@ namespace SimonDuel.Game
         [SerializeField] PadBoard board;
         [SerializeField] DuelScreen screen;
         [SerializeField] Boot boot;
+        [SerializeField] SoundBoard sounds;
+        [SerializeField] Effects effects;
+        [SerializeField] Feel feel;
+        [SerializeField] Tutorial tutorial;
 
         const int NoActivePlayer = -1;
         const int ComputerSeat = 1;
 
-        enum Stage { BeforeStart, Menu, Waiting, ReadyToWatch, Watching, Repeating, ComputerRepeating, AddingOne, ChoosingTwist, MatchResult }
+        enum Stage { BeforeStart, Menu, Tutorial, Waiting, ReadyToWatch, Watching, Repeating, ComputerRepeating, AddingOne, ChoosingTwist, MatchResult }
 
         readonly string[] names = new string[Referee.PlayerCount];
         Referee referee;
@@ -40,6 +44,13 @@ namespace SimonDuel.Game
             screen.Listen(Rematch, GoToMenu, MatchNotes.Download);
             screen.ListenToTwists(() => DecideTwist(true), () => DecideTwist(false));
             screen.ListenToMenu(Play);
+            screen.ListenToPause(() => SetPaused(true), () => SetPaused(false), QuitToMenu, ShowTutorial);
+            GameSettings.Apply();
+        }
+
+        public bool PressIsOnPauseButton(Vector2 screenPoint)
+        {
+            return stage != Stage.BeforeStart && screen.IsOverPauseButton(screenPoint);
         }
 
         // Every press comes here first. Returns true when it was used up and must not reach a pad.
@@ -47,14 +58,11 @@ namespace SimonDuel.Game
         {
             if (boot.TryStart())
             {
-                GoToMenu();
+                if (Tutorial.Done) GoToMenu();
+                else ShowTutorial();
                 return true;
             }
-            if (paused)
-            {
-                SetPaused(false);
-                return true;
-            }
+            if (paused) return true;
             if (stage != Stage.ReadyToWatch) return false;
 
             stage = Stage.Watching;
@@ -67,10 +75,25 @@ namespace SimonDuel.Game
 
             if (stage == Stage.Repeating) Tap(pad);
             else if (stage == Stage.AddingOne) AddStep(pad);
+            else if (stage == Stage.Tutorial) tutorial.Press(pad);
+        }
+
+        void ShowTutorial()
+        {
+            stage = Stage.Tutorial;
+            screen.ShowMenu(false);
+            StartCoroutine(PlayTutorial());
+        }
+
+        IEnumerator PlayTutorial()
+        {
+            yield return tutorial.Run();
+            GoToMenu();
         }
 
         void GoToMenu()
         {
+            sounds.Play(GameSound.Click);
             stage = Stage.Menu;
             referee = null;
             screen.HideResult();
@@ -79,6 +102,7 @@ namespace SimonDuel.Game
 
         void Play(PlaySetup chosen)
         {
+            sounds.Play(GameSound.Click);
             setup = chosen;
             screen.ShowMenu(false);
             Begin(NewReferee());
@@ -115,8 +139,17 @@ namespace SimonDuel.Game
             StartCoroutine(Practising ? PlayPractice() : PlayMatch());
         }
 
+        void QuitToMenu()
+        {
+            StopAllCoroutines();
+            SetPaused(false);
+            board.ShiftHome(0.01f);
+            GoToMenu();
+        }
+
         void Rematch()
         {
+            sounds.Play(GameSound.Click);
             Begin(Practising ? NewReferee() : referee.Rematch());
         }
 
@@ -147,6 +180,8 @@ namespace SimonDuel.Game
             MatchNotes.Add(summary, Mathf.RoundToInt(Time.time - matchStartedAt));
 
             string title = referee.Winner == 0 && setup.mode == GameMode.Computer ? "YOU WIN" : $"{names[referee.Winner]} WINS";
+            sounds.Play(GameSound.Win);
+            effects.Confetti(new[] { feel.playerColors[referee.Winner], feel.looks[1].rest, feel.looks[2].rest, feel.looks[3].rest });
             screen.ShowResult(title, referee.Winner, $"{referee.Score(0)} - {referee.Score(1)}", "REMATCH", MatchNotes.Count);
         }
 
@@ -207,9 +242,9 @@ namespace SimonDuel.Game
             ShowPlayers(player);
             screen.ShowLength(referee.Pattern.Count);
             screen.ShowTimerDirection(false);
-            screen.ShowTimer(1f);
             screen.ShowBanner(names[player]);
-            yield return new WaitForSeconds(timing.ownershipSeconds);
+            sounds.Play(player == 0 ? GameSound.TurnOne : GameSound.TurnTwo);
+            yield return SweepRing();
 
             if (referee.IncomingTwist != TwistId.None) yield return AnnounceTwist(referee.IncomingTwist);
 
@@ -268,10 +303,24 @@ namespace SimonDuel.Game
                 yield return new WaitForSeconds(timing.rallyLossRevealSeconds);
                 ShowPlayers(NoActivePlayer);
                 screen.ShowBanner($"POINT TO {names[referee.LastRallyWinner]}");
+                sounds.Play(GameSound.Point);
                 yield return new WaitForSeconds(timing.pointCelebrationSeconds);
             }
 
             yield return SlideHomeAfter(plan);
+        }
+
+        // The ring fills in the new player's color as the turn changes hands.
+        IEnumerator SweepRing()
+        {
+            float seconds = GameSettings.ReduceMotion ? 0f : feel.handOverSeconds;
+            for (float t = 0f; t < seconds; t += Time.deltaTime)
+            {
+                screen.ShowTimer(t / seconds);
+                yield return null;
+            }
+            screen.ShowTimer(1f);
+            yield return new WaitForSeconds(Mathf.Max(0f, timing.ownershipSeconds - seconds));
         }
 
         IEnumerator WatchAndPause(TurnPlan plan)
@@ -279,22 +328,25 @@ namespace SimonDuel.Game
             stage = Stage.Watching;
             screen.ShowBanner("WATCH");
             bool lightsOff = Practising && setup.practice == PracticeKind.SoundOnly;
+            float pace = GameSettings.SlowPlayback ? timing.slowPlaybackFactor : 1f;
+            float light = plan.LightMs / 1000f * pace;
 
             for (int i = 0; i < plan.Playback.Count; i++)
             {
                 var pad = board.Find(plan.Playback[i]);
                 bool echoed = plan.EchoStep >= 0 && (i == plan.EchoStep || i == plan.EchoStep + 1);
                 if (lightsOff) pad.PlayToneOnly();
-                else pad.Play(plan.LightMs / 1000f, echoed ? board.TwistColor : Color.white);
+                else pad.Play(light, echoed ? board.TwistColor : Color.white);
 
-                float gap = i == plan.EchoStep ? timing.echoGapSeconds : plan.GapMs / 1000f;
-                yield return new WaitForSeconds(plan.LightMs / 1000f + gap);
+                float gap = i == plan.EchoStep ? timing.echoGapSeconds : plan.GapMs / 1000f * pace;
+                yield return new WaitForSeconds(light + gap);
             }
 
             if (plan.Twist == TwistId.Shift)
             {
                 screen.ShowBanner("SHIFT!");
-                board.ShiftClockwise(timing.shiftSeconds);
+                sounds.Play(GameSound.Twist);
+                board.ShiftClockwise(ShiftTime());
                 yield return new WaitForSeconds(timing.shiftSeconds);
             }
             yield return new WaitForSeconds(timing.readyBeatSeconds);
@@ -313,13 +365,16 @@ namespace SimonDuel.Game
         IEnumerator SlideHomeAfter(TurnPlan plan)
         {
             if (plan.Twist != TwistId.Shift) yield break;
-            board.ShiftHome(timing.shiftSeconds);
+            board.ShiftHome(ShiftTime());
             yield return new WaitForSeconds(timing.shiftSeconds);
         }
+
+        float ShiftTime() => GameSettings.ReduceMotion ? 0.01f : timing.shiftSeconds;
 
         IEnumerator AnnounceTwist(TwistId twist)
         {
             screen.ShowBanner(TwistSentence(twist));
+            sounds.Play(GameSound.Twist);
             Debug.Log($"[Duel] twist incoming {twist}");
 
             string seenKey = $"CuzGames.SeenTwist.{twist}";
@@ -350,9 +405,9 @@ namespace SimonDuel.Game
             }
             else if (twist == TwistId.Shift)
             {
-                board.ShiftClockwise(timing.shiftSeconds);
+                board.ShiftClockwise(ShiftTime());
                 yield return new WaitForSeconds(timing.shiftSeconds + step);
-                board.ShiftHome(timing.shiftSeconds);
+                board.ShiftHome(ShiftTime());
                 yield return new WaitForSeconds(timing.shiftSeconds);
             }
             else if (twist == TwistId.Echo)
@@ -436,12 +491,17 @@ namespace SimonDuel.Game
             if (verdict.Result == TapResult.Wrong)
             {
                 pad.ShowWrong();
+                effects.Burst(pad.transform.position, feel.wrongRimColor, feel.wrongBurstPieces);
                 EndRally("SLIP!", verdict.Expected, $"slip step={entered + 1} tapped={pad.Id}");
                 return;
             }
 
             pad.Press();
-            if (verdict.Result == TapResult.Complete) stage = Stage.Waiting;
+            effects.Burst(pad.transform.position, feel.looks[(int)pad.Id].lit, feel.burstPieces);
+            if (verdict.Result != TapResult.Complete) return;
+
+            sounds.Play(GameSound.Done);
+            stage = Stage.Waiting;
         }
 
         void AddStep(Pad pad)
@@ -455,7 +515,9 @@ namespace SimonDuel.Game
         void EndRally(string word, PadId expected, string why)
         {
             board.Find(expected).Play(timing.rallyLossRevealSeconds);
+            sounds.Play(GameSound.Wrong);
             screen.ShowBanner(word);
+            screen.ShowRingError();
             Debug.Log($"[Duel] rally ends {why} expected={expected} score={referee.Score(0)}-{referee.Score(1)}");
             stage = Stage.Waiting;
         }
