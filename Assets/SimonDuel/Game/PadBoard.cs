@@ -85,7 +85,6 @@ namespace SimonDuel.Game
         {
             var pointer = (Pointer)context.control.device;
             if (runner.PressIsOnPauseButton(pointer.position.ReadValue())) return;
-            if (runner.PressAnywhere()) return;
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(board, pointer.position.ReadValue(), null, out var point);
             foreach (var pad in pads)
@@ -99,7 +98,6 @@ namespace SimonDuel.Game
         // Keys follow places on the board, so Shift matters on a keyboard too.
         void OnKeyPress(int slot, InputAction.CallbackContext context)
         {
-            if (runner.PressAnywhere()) return;
             foreach (var pad in pads)
             {
                 if (pad.Slot != slot) continue;

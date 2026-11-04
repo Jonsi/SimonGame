@@ -45,7 +45,7 @@ Each conflict becomes a named setting, so it is settled by playing, not by argui
 | Fastest playback | Floor 0.32 s light + 0.10 s gap | "Fast" 0.25 s + 0.10 s | GDD floor | Playtest (setting) |
 | Charge between rallies | Not stated | Not stated | Resets each rally | Setting |
 | Pads after a Shift turn | Not stated | Not stated | Slide home during the hand-over | Playtest |
-| Start of a same-phone turn | Ownership banner, then playback | Same | Add "tap when ready" before playback, so the pattern never starts while the phone is still being passed | Playtest |
+| Start of a turn | Ownership banner, then playback | Same | Owner, 4 Nov 2026: no click before a turn; the banner and ring sweep run about a second, then the pattern plays. Re-check for passing a phone | Playtest |
 | Computer opponent | Not in first playable | "Simple bot fallback" | In: the owner wants single player | Owner |
 | Online | Later | Only after local proves out | After the checkpoint, at step 11 | Owner |
 | Leaving the app | Pauses and hides the pattern | — | Same for offline. Online turns cannot pause: leaving during input counts as a timeout after a 10 s grace | Playtest |

@@ -38,7 +38,7 @@ Make it a browser game:
 - [x] **1.11** Keep the download small: compressed files with a fallback that works on any web host, unused engine parts stripped. *Done when* the first load is under about 15 MB. Done 3 Nov 2026: first test build is 13.2 MB.
 - [x] **1.12** Picture settings: 2D renderer, HDR off, anti-aliasing off, post-processing off, Unity splash screen off, one quality level. Done 3 Nov 2026: one quality level, named "Game".
 - [x] **1.13** Input: Unity's new input system only, with touch and mouse both working. Done 3 Nov 2026 (already set by the template; the first screen uses it).
-- [x] **1.14** Sound: a "Tap to start" screen, because browsers only allow sound after the first tap. Done 3 Nov 2026: the cover clears on the first tap.
+- [x] **1.14** Sound: browsers only allow sound after the first click. Owner, 4 Nov 2026: no "Tap to start" screen; that first click is the one on the menu. Done 3 Nov 2026: the cover clears on the first tap.
 
 The first screen:
 
@@ -93,11 +93,11 @@ Rules (tested without opening the app):
 
 On screen:
 
-- [x] **3.11** Turn order on screen: whose turn → "tap when ready" → watch → short pause → repeat → add one → hand over. Done 4 Nov 2026 ("click when ready" on the computer).
+- [x] **3.11** Turn order on screen: whose turn → watch → short pause → repeat → add one → hand over. Done 4 Nov 2026; owner removed the "click when ready" step the same day, so a turn starts by itself.
 - [x] **3.12** Watch: pads light and sound in order at the right speed. Taps are ignored meanwhile. Done 4 Nov 2026.
 - [x] **3.13** Repeat: the timer runs; a slip ends the rally and shows the pad that was expected. Done 4 Nov 2026.
 - [x] **3.14** Add one: "ADD ONE" shows; the chosen pad plays once and joins the pattern. Done 4 Nov 2026.
-- [x] **3.15** Hand over: "Player 2, tap when ready", so the pattern never starts while the players are still swapping. Done 4 Nov 2026.
+- [x] **3.15** Hand over: the banner names the next player and the ring sweeps round, then the turn starts by itself. Done 4 Nov 2026.
 - [x] **3.16** Widescreen panels and banner: names, score pips, state word (WATCH / REPEAT / ADD ONE), pattern length, the ring as the timer. Done 4 Nov 2026.
 - [x] **3.17** Rally result: the slip for a moment, then the point to the other side. Done 4 Nov 2026.
 - [x] **3.18** Match result: winner, score, a big Rematch button, a smaller Home button. Done 4 Nov 2026.
@@ -171,7 +171,7 @@ You can try at the end: the same game from a private link in your phone's browse
 - [ ] **M.06** A buzz on/off setting. In the Unity Editor the buzz only writes to the log. (Was 2.11.)
 - [ ] **M.07** Check touch: only the first finger counts, and taps outside the pads do nothing.
 - [ ] **M.08** **You:** tap fast and slow while filming with another phone's slow-motion camera. *Done when* it feels instant (under about 80 ms).
-- [ ] **M.09** **You:** play a full match passing one phone. Your notes go in the journal.
+- [ ] **M.09** **You:** play a full match passing one phone. Your notes go in the journal. (The turn now starts by itself; check there is enough time to pass the phone.)
 - [ ] **M.10** Adjust speeds and the turn timer if thumbs need different numbers than the mouse did.
 
 ## Checkpoint — real players

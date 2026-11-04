@@ -17,7 +17,6 @@ namespace SimonDuel.Game
         [SerializeField] Timing timing;
         [SerializeField] PadBoard board;
         [SerializeField] DuelScreen screen;
-        [SerializeField] Boot boot;
         [SerializeField] SoundBoard sounds;
         [SerializeField] Effects effects;
         [SerializeField] Feel feel;
@@ -26,13 +25,13 @@ namespace SimonDuel.Game
         const int NoActivePlayer = -1;
         const int ComputerSeat = 1;
 
-        enum Stage { BeforeStart, Menu, Tutorial, Waiting, ReadyToWatch, Watching, Repeating, ComputerRepeating, AddingOne, ChoosingTwist, MatchResult }
+        enum Stage { Menu, Tutorial, Waiting, Watching, Repeating, ComputerRepeating, AddingOne, ChoosingTwist, MatchResult }
 
         readonly string[] names = new string[Referee.PlayerCount];
         Referee referee;
         ComputerBrain brain;
         PlaySetup setup;
-        Stage stage = Stage.BeforeStart;
+        Stage stage = Stage.Menu;
         bool paused;
         float timeAllowed, timeUsed, nextLogAt, matchStartedAt;
         int turn;
@@ -46,27 +45,13 @@ namespace SimonDuel.Game
             screen.ListenToMenu(Play);
             screen.ListenToPause(() => SetPaused(true), () => SetPaused(false), QuitToMenu, ShowTutorial);
             GameSettings.Apply();
+            screen.ShowMenu(true);
+            screen.ShowFirstTimeHint(!Tutorial.Done);
         }
 
         public bool PressIsOnPauseButton(Vector2 screenPoint)
         {
-            return stage != Stage.BeforeStart && screen.IsOverPauseButton(screenPoint);
-        }
-
-        // Every press comes here first. Returns true when it was used up and must not reach a pad.
-        public bool PressAnywhere()
-        {
-            if (boot.TryStart())
-            {
-                if (Tutorial.Done) GoToMenu();
-                else ShowTutorial();
-                return true;
-            }
-            if (paused) return true;
-            if (stage != Stage.ReadyToWatch) return false;
-
-            stage = Stage.Watching;
-            return true;
+            return screen.IsOverPauseButton(screenPoint);
         }
 
         public void PressPad(Pad pad)
@@ -98,6 +83,7 @@ namespace SimonDuel.Game
             referee = null;
             screen.HideResult();
             screen.ShowMenu(true);
+            screen.ShowFirstTimeHint(!Tutorial.Done);
         }
 
         void Play(PlaySetup chosen)
@@ -188,12 +174,10 @@ namespace SimonDuel.Game
         IEnumerator PlayPractice()
         {
             ShowPlayers(0);
-            screen.ShowBanner("CLICK WHEN READY");
+            screen.ShowBanner("GET READY");
             screen.ShowLength(referee.Pattern.Count);
             screen.ShowTimerDirection(false);
-            screen.ShowTimer(1f);
-            stage = Stage.ReadyToWatch;
-            while (stage == Stage.ReadyToWatch) yield return null;
+            yield return SweepRing();
 
             while (referee.Phase != MatchPhase.MatchOver)
             {
@@ -242,18 +226,11 @@ namespace SimonDuel.Game
             ShowPlayers(player);
             screen.ShowLength(referee.Pattern.Count);
             screen.ShowTimerDirection(false);
-            screen.ShowBanner(names[player]);
+            screen.ShowBanner(setup.mode == GameMode.Computer && player == 0 ? "YOUR TURN" : $"{names[player]}'S TURN");
             sounds.Play(player == 0 ? GameSound.TurnOne : GameSound.TurnTwo);
             yield return SweepRing();
 
             if (referee.IncomingTwist != TwistId.None) yield return AnnounceTwist(referee.IncomingTwist);
-
-            if (!computer)
-            {
-                screen.ShowBanner($"{names[player]}: CLICK WHEN READY");
-                stage = Stage.ReadyToWatch;
-                while (stage == Stage.ReadyToWatch) yield return null;
-            }
 
             var plan = referee.StartTurn();
             Debug.Log($"[Duel] turn={turn} {names[player]} watch len={plan.Pattern.Count} twist={plan.Twist} light={plan.LightMs}ms gap={plan.GapMs}ms time={plan.TimeAllowedMs}ms");
@@ -587,8 +564,7 @@ namespace SimonDuel.Game
 
             if (keyboard.f1Key.wasPressedThisFrame)
             {
-                if (stage == Stage.ReadyToWatch) stage = Stage.Watching;
-                else if (stage == Stage.ChoosingTwist) DecideTwist(true);
+                if (stage == Stage.ChoosingTwist) DecideTwist(true);
                 else if (stage == Stage.AddingOne) AddStep(board.Find(referee.Pattern[0]));
                 else
                     while (stage == Stage.Repeating) Tap(board.Find(referee.Expected));

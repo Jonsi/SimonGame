@@ -12,8 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2053bff43afe04351a6e1837d9d53a2b, type: 3}
   m_Name: Timing
   m_EditorClassIdentifier: SimonDuel.Game::SimonDuel.Game.Timing
-  ownershipSeconds: 0.55
+  ownershipSeconds: 1.1
   readyBeatSeconds: 0.35
   addOneHoldSeconds: 0.42
   rallyLossRevealSeconds: 1.1
   pointCelebrationSeconds: 1.4
+  twistNameSeconds: 0.65
+  twistFirstTimeSeconds: 1.25
+  twistChoiceSeconds: 4
+  shiftSeconds: 0.65
+  echoGapSeconds: 0.08
+  demoStepSeconds: 0.25
+  slowPlaybackFactor: 1.4
+  tutorialLineSeconds: 1.9
+  tutorialStepSeconds: 0.5
+  tutorialGapSeconds: 0.18
+  tutorialPauseSeconds: 0.5

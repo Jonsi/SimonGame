@@ -51,6 +51,14 @@ namespace SimonDuel.Game
             }
         }
 
+        // Newcomers are pointed at "How to play".
+        public void ShowFirstTimeHint(bool show)
+        {
+            howToPlay.GetComponent<Image>().color = show ? feel.playerColors[0] : Idle;
+            howToPlay.GetComponentInChildren<Text>().color = show ? feel.symbolColor : Color.white;
+            howToPlay.GetComponentInChildren<Text>().text = show ? "NEW? HOW TO PLAY" : "HOW TO PLAY";
+        }
+
         public void ShowMenu(bool show)
         {
             menu.SetActive(show);

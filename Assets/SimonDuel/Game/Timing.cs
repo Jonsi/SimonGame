@@ -6,7 +6,7 @@ namespace SimonDuel.Game
     [CreateAssetMenu(menuName = "CuzGames/Timing")]
     public class Timing : ScriptableObject
     {
-        public float ownershipSeconds = 0.55f;
+        public float ownershipSeconds = 1.1f;   // the turn starts by itself after this
         public float readyBeatSeconds = 0.35f;
         public float addOneHoldSeconds = 0.42f;
         public float rallyLossRevealSeconds = 1.10f;

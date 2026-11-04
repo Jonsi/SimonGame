@@ -43,6 +43,11 @@ namespace SimonDuel.Game
         public float confettiSeconds = 3f;
         public float confettiGravity = 260f;
 
+        [Header("Menu")]
+        public float hoverScale = 1.05f;
+        public float hoverSpeed = 1.2f;
+        public float attractStepSeconds = 0.7f;
+
         [Header("Screens")]
         public float handOverSeconds = 0.45f;
         public float pipPopSeconds = 0.5f;
