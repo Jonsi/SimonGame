@@ -101,6 +101,7 @@ namespace SimonDuel.Game
 
             var practice = rules.rules.Copy();
             practice.practiceAlone = true;
+            practice.replayEachTurn = true;
             practice.noTimer = setup.practice == PracticeKind.Classic;
             practice.twistEveryTurn = setup.practice == PracticeKind.Twists;
             return new Referee(practice, seed, 0);
@@ -272,7 +273,7 @@ namespace SimonDuel.Game
 
                 ShowPlayers(plan.Player);
                 screen.ShowLength(referee.Pattern.Count);
-                yield return new WaitForSeconds(timing.addOneHoldSeconds);
+                yield return ShowNewStep();
                 if (referee.Phase == MatchPhase.ArmChoice) yield return OfferTwist(computer);
             }
             else
@@ -285,6 +286,17 @@ namespace SimonDuel.Game
             }
 
             yield return SlideHomeAfter(plan);
+        }
+
+        // The added step is the only new thing, so it always shows at one fixed pace.
+        // Pressing fast can never hide it.
+        IEnumerator ShowNewStep()
+        {
+            stage = Stage.Waiting;
+            screen.ShowBanner("NEW STEP");
+            yield return new WaitForSeconds(timing.addOneHoldSeconds);
+            board.Find(referee.Pattern[referee.Pattern.Count - 1]).Play(timing.newStepSeconds);
+            yield return new WaitForSeconds(timing.newStepSeconds + timing.addOneHoldSeconds);
         }
 
         // The ring fills in the new player's color as the turn changes hands.
@@ -303,6 +315,13 @@ namespace SimonDuel.Game
         IEnumerator WatchAndPause(TurnPlan plan)
         {
             stage = Stage.Watching;
+            if (!plan.ShowPattern)
+            {
+                yield return ShowEchoStep(plan);
+                yield return ShiftPads(plan);
+                yield break;
+            }
+
             screen.ShowBanner("WATCH");
             bool lightsOff = Practising && setup.practice == PracticeKind.SoundOnly;
             float pace = GameSettings.SlowPlayback ? timing.slowPlaybackFactor : 1f;
@@ -319,14 +338,32 @@ namespace SimonDuel.Game
                 yield return new WaitForSeconds(light + gap);
             }
 
-            if (plan.Twist == TwistId.Shift)
-            {
-                screen.ShowBanner("SHIFT!");
-                sounds.Play(GameSound.Twist);
-                board.ShiftClockwise(ShiftTime());
-                yield return new WaitForSeconds(timing.shiftSeconds);
-            }
+            yield return ShiftPads(plan);
             yield return new WaitForSeconds(timing.readyBeatSeconds);
+        }
+
+        // With no replay, Echo points out its doubled step on its own.
+        IEnumerator ShowEchoStep(TurnPlan plan)
+        {
+            if (plan.Twist != TwistId.Echo) yield break;
+
+            screen.ShowBanner($"STEP {plan.EchoStep + 1} COUNTS TWICE");
+            var pad = board.Find(plan.Playback[plan.EchoStep]);
+            for (int i = 0; i < 2; i++)
+            {
+                pad.Play(timing.demoStepSeconds, board.TwistColor);
+                yield return new WaitForSeconds(timing.demoStepSeconds + timing.echoGapSeconds);
+            }
+        }
+
+        IEnumerator ShiftPads(TurnPlan plan)
+        {
+            if (plan.Twist != TwistId.Shift) yield break;
+
+            screen.ShowBanner("SHIFT!");
+            sounds.Play(GameSound.Twist);
+            board.ShiftClockwise(ShiftTime());
+            yield return new WaitForSeconds(timing.shiftSeconds);
         }
 
         void OpenRepeat(TurnPlan plan, Stage repeating)
@@ -445,8 +482,8 @@ namespace SimonDuel.Game
             switch (twist)
             {
                 case TwistId.Reverse: return "REVERSE: REPEAT IT BACK TO FRONT";
-                case TwistId.Shift: return "SHIFT: THE PADS MOVE AFTER YOU WATCH";
-                default: return "ECHO: ONE STEP PLAYS TWICE, PRESS IT TWICE";
+                case TwistId.Shift: return "SHIFT: THE PADS MOVE, THE PATTERN DOESN'T";
+                default: return "ECHO: ONE STEP COUNTS TWICE, PRESS IT TWICE";
             }
         }
 

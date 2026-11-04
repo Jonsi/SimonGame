@@ -196,6 +196,30 @@ namespace SimonDuel.Tests
         }
 
         [Test]
+        public void ThePatternShowsOnlyOnARallysFirstTurn()
+        {
+            var referee = NewMatch();
+            Assert.IsTrue(referee.StartTurn().ShowPattern);
+            referee.TimeOut();
+            referee.NextRally();
+            var plan = referee.StartTurn();
+            Assert.IsTrue(plan.ShowPattern);
+            foreach (var step in plan.Entry) referee.Tap(step, 100);
+            referee.AddStep(PadId.Star);
+            Assert.IsFalse(referee.StartTurn().ShowPattern);
+        }
+
+        [Test]
+        public void PracticeCanShowThePatternEveryTurn()
+        {
+            var referee = new Referee(new RulesConfig { replayEachTurn = true, practiceAlone = true }, 2, 0);
+            var plan = referee.StartTurn();
+            foreach (var step in plan.Entry) referee.Tap(step, 100);
+            referee.AddRandomStep();
+            Assert.IsTrue(referee.StartTurn().ShowPattern);
+        }
+
+        [Test]
         public void TurnsCannotBeStartedTwice()
         {
             var referee = NewMatch();

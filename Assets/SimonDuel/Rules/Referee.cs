@@ -27,6 +27,7 @@ namespace SimonDuel.Rules
         public IReadOnlyList<PadId> Playback;   // what is shown: the pattern, with Echo's step doubled
         public IReadOnlyList<PadId> Entry;      // what must be pressed, in order
         public TwistId Twist;
+        public bool ShowPattern;                // the whole pattern plays first: a rally's first turn, and practice
         public int EchoStep = -1;               // the first of Echo's two steps in Playback
         public int LightMs;
         public int GapMs;
@@ -141,6 +142,7 @@ namespace SimonDuel.Rules
                 Playback = playback,
                 Entry = entry.ToArray(),
                 Twist = ActiveTwist,
+                ShowPattern = rules.replayEachTurn || turnsDoneThisRally == 0,
                 EchoStep = echoStep,
                 LightMs = Math.Max(rules.playbackLightFloorMs, rules.playbackLightMs - extraSteps * rules.playbackLightDropPerStepMs),
                 GapMs = Math.Max(rules.playbackGapFloorMs, rules.playbackGapMs - extraSteps * rules.playbackGapDropPerStepMs),

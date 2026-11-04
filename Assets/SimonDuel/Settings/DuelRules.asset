@@ -15,6 +15,7 @@ MonoBehaviour:
   rules:
     ralliesToWin: 2
     startingSteps: 2
+    replayEachTurn: 0
     timerBaseMs: 3000
     timerPerStepMs: 750
     timerMaxMs: 14000

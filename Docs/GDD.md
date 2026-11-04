@@ -4,7 +4,7 @@
 **Version:** 0.1  
 **Primary platform:** iOS and Android phones  
 **Orientation:** Portrait  
-**Working title:** Simon Duel
+**Working title:** Simon Duel — internal codename only, pending professional name and trade-dress clearance
 
 ## 1. High concept
 
@@ -39,7 +39,7 @@ The game should be understandable in under 30 seconds, produce tension within th
 - Local Pass & Play for two players on one phone.
 - Best-of-five match: first player to win three rallies wins.
 - Four input pads with unique colors, shapes, tones, and haptic identities.
-- Two Twists: Reverse and Shuffle.
+- Two Twists: Reverse and Shift.
 - Tutorial, pause, rematch, sound, haptics, reduced motion, and color-accessible presentation.
 
 ### Recommended version 1.0
@@ -47,7 +47,7 @@ The game should be understandable in under 30 seconds, produce tension within th
 - Pass & Play Duel.
 - Solo Practice.
 - Party Elimination for 3–8 local players.
-- Five Twists: Reverse, Shuffle, Echo, Rush, and Blackout.
+- Five Twists: Reverse, Shift, Echo, Rush, and Blackout.
 - Player names, local statistics, cosmetic board themes, and a lightweight unlock track.
 
 ### Later expansion
@@ -79,7 +79,7 @@ Online multiplayer is intentionally outside the current design phase. It must no
 2. The starting player is chosen randomly for the first rally.
 3. Starting player alternates after each rally.
 4. The system seeds the rally with a two-step sequence.
-5. The active player watches the sequence, repeats it, then adds one new step.
+5. The active player repeats the sequence from memory, then adds one new step. The sequence is shown once when the rally starts; after that, only each new step is shown, once, at a fixed speed, for both players.
 6. The opponent receives the longer sequence and does the same.
 7. A mistake or timeout ends the rally; the opponent earns one rally point.
 8. First to three rally points wins the match.
@@ -90,7 +90,7 @@ The added step gives each turn authorship. Players do not merely survive a syste
 
 ### Sequence identity
 
-Every step refers to a **pad identity**, not a screen position. A pad identity always keeps its color, symbol, tone, and haptic signature together. If Shuffle changes positions, all four identity cues move together.
+Every step refers to a **pad identity**, not a screen position. A pad identity always keeps its color, symbol, tone, and haptic signature together. If Shift changes positions, all four identity cues move together.
 
 ### Input rules
 
@@ -106,7 +106,7 @@ Every step refers to a **pad identity**, not a screen position. A pad identity a
 
 1. **Ownership** — active player color, name, and crown become prominent.
 2. **Twist warning** — if a Twist is active, its name and rule appear briefly.
-3. **Playback** — the full sequence plays once.
+3. **Playback** — only on a rally's first turn: the full sequence plays once. After that the turn goes straight to Repeat.
 4. **Ready beat** — a short visual breath separates playback from input.
 5. **Repeat** — the player enters the complete sequence.
 6. **Extend** — “ADD ONE” appears and the player chooses a new step.
@@ -148,8 +148,8 @@ This cadence makes Twists occasional dramatic moments rather than constant noise
 | Twist | Rule | Presentation | Release |
 |---|---|---|---|
 | Reverse | Repeat the sequence from last step to first. | Circular reverse arrows; sequence ring travels counter-clockwise. | First playable |
-| Shuffle | After playback, pad positions rotate. Repeat by identity, not old position. | Pads visibly orbit into new slots; color, symbol, tone remain paired. | First playable |
-| Echo | One clearly marked step plays twice and must be entered twice. | Concentric pulse and paired beat marker. | 1.0 |
+| Shift | After playback, all pad identities rotate one slot clockwise. Repeat by identity, not old position. | Pads visibly orbit into new slots; color, symbol, tone remain paired. | First playable |
+| Echo | One clearly marked step is flagged and must be entered twice. | Concentric pulse and paired beat marker. | 1.0 |
 | Rush | Playback and input pulse run faster for one turn. | Forward streaks and accelerating ring. | 1.0 |
 | Blackout | One step is presented by tone and haptic only. | Pad silhouette dims; audio-wave marker appears. | 1.0 |
 
@@ -157,7 +157,7 @@ This cadence makes Twists occasional dramatic moments rather than constant noise
 
 - The active rule is always named before playback.
 - First encounter includes a one-sentence explanation and demonstration.
-- Shuffle completes before input begins.
+- Shift completes before input begins.
 - Blackout is unavailable when game audio and haptics are both disabled.
 - No Twist changes more than one mental rule at a time.
 - Reduced-motion mode replaces orbiting or spinning transitions with crossfades and position markers.
@@ -356,7 +356,7 @@ The design is succeeding when:
 
 - Is a two-step seed more satisfying than a one-step seed?
 - Should the active player choose when to arm a Twist, or should it trigger automatically at full Charge?
-- Does Shuffle rotate all pads predictably or randomize them?
+- Does the first-playable one-slot clockwise Shift create enough challenge, or should later tests add a clearly announced counter-clockwise variant?
 - Is best-of-five the ideal match length for local play?
 - Does the timeout add healthy tension or punish thoughtful players?
 - How many normal turns should occur before the first Twist?

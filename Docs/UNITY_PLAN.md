@@ -45,6 +45,7 @@ Each conflict becomes a named setting, so it is settled by playing, not by argui
 | Fastest playback | Floor 0.32 s light + 0.10 s gap | "Fast" 0.25 s + 0.10 s | GDD floor | Playtest (setting) |
 | Charge between rallies | Not stated | Not stated | Resets each rally | Setting |
 | Pads after a Shift turn | Not stated | Not stated | Slide home during the hand-over | Playtest |
+| What each turn shows | The whole pattern every turn | Same | Owner, 4 Nov 2026: the pattern shows once per rally, then only each new step, at a fixed speed. Pressing fast hides nothing. Practice still replays | Owner |
 | Start of a turn | Ownership banner, then playback | Same | Owner, 4 Nov 2026: no click before a turn; the banner and ring sweep run about a second, then the pattern plays. Re-check for passing a phone | Playtest |
 | Computer opponent | Not in first playable | "Simple bot fallback" | In: the owner wants single player | Owner |
 | Online | Later | Only after local proves out | After the checkpoint, at step 11 | Owner |
@@ -134,7 +135,7 @@ Classic (the game adds steps), Endless, Twist practice, plus sight-only and soun
 1. A match lives on the server as its seed, the rules version and the list of turns.
 2. Your phone plays your whole turn on its own (playback, input, timer), then sends one turn record: taps with times, the added step, the Twist armed.
 3. The server runs the same referee over that record: right taps, inside the time budget, Twist allowed. Then it saves the turn and tells the other phone, instantly if they are in the game, by phone notification if not.
-4. The other phone can show **their turn, replayed**, then starts its own turn.
+4. The other phone shows **the new step**, once, then starts its own turn.
 
 - **Live and later are one thing.** The same match flows live while both players are present and waits while one is away (owner pick B3). Turn deadline: 24 hours, as a setting.
 - **No lost turns.** A played turn stays on the phone until the server confirms it; each turn carries an ID, so sending it twice is harmless.
@@ -143,7 +144,7 @@ Classic (the game adds steps), Endless, Twist practice, plus sight-only and soun
 - **Accounts:** a guest account is created quietly on the first online match. Sign in with Apple or Google keeps progress across phones. Account deletion lives in Settings (both stores require it).
 - **Friends only (owner pick C1).** No random players or quick match at launch. Notes kept in case the numbers ask for it later: your first turn is played now, and the next person searching picks the match up, so nobody has to be online at the same moment. The computer is offered openly while waiting: labelled, with no fake human profile, and kept out of ratings and rewards. Bots passed off as people get spotted and resented, and the EU now requires telling people when they face an AI.
 - **Cheating, plainly:** nothing can stop a player writing the pattern down or filming the screen. The server rejects impossible input (for example long runs of taps under about 90 ms apart). With friends-only play there is nothing to win by it.
-- **Fairness note:** the replay shows the pattern one extra time to the next player. Both players get it, so it stays even; it is a setting in case it proves too helpful.
+- **What the next player sees** (owner, 4 Nov 2026): no replay of the pattern. Only the opponent's new step is shown, once, at the fixed speed, so waiting turns need just that one step sent across.
 
 **Service choice**
 

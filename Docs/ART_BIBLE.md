@@ -4,6 +4,8 @@
 **Reference canvas:** 1080 × 1920 portrait  
 **Purpose:** Define a consistent visual target before Unity implementation.
 
+**Naming note:** Simon Duel is an internal codename. Public branding and the final board silhouette require professional name and trade-dress clearance.
+
 ## 1. Art direction
 
 Simon Duel combines the clarity of a physical memory toy with the energy of a modern competitive mobile game.
@@ -61,10 +63,10 @@ Generated reference images communicate style and mood. This document and the SVG
 
 | Identity | Base | Highlight | Shadow | Symbol | Meaning |
 |---|---|---|---|---|---|
-| Circle / Coral | `#FF5A52` | `#FF9188` | `#B92F3C` | `#F7FBFF` | Low tone; rounded pulse |
+| Circle / Coral | `#FF5A52` | `#FF9188` | `#B92F3C` | `#07142B` | Low tone; rounded pulse |
 | Triangle / Sun | `#FFC62E` | `#FFE477` | `#C88900` | `#07142B` | Bright tone; crisp pulse |
 | Square / Mint | `#42D79A` | `#87EBC2` | `#168E67` | `#07142B` | Mid tone; double soft pulse |
-| Star / Electric | `#2B9DF4` | `#79C9FF` | `#125FAF` | `#F7FBFF` | High tone; pulse with tail |
+| Star / Electric | `#2B9DF4` | `#79C9FF` | `#125FAF` | `#07142B` | High tone; pulse with tail |
 
 ### Player and system accents
 
@@ -89,6 +91,17 @@ Generated reference images communicate style and mood. This document and the SVG
 - Error red must use an X, shake, or broken ring so it cannot be confused with the coral Circle pad.
 - Bloom is a derived effect, not a replacement for a solid silhouette.
 - Maximum simultaneous saturated accents during normal play: the four pads plus one active player color.
+- Player 1 ownership uses a solid perimeter/ring pattern; Player 2 uses a segmented pattern so ownership does not rely on orange/cyan alone.
+
+### Contrast audit
+
+The August 2026 accessibility audit found that white on Coral (`2.95:1`) and white on Electric (`2.79:1`) miss the `3:1` meaningful non-text contrast target. Dark Ink is now authoritative for those pad glyphs (`5.98:1` and `6.32:1` respectively against the base colors). If a future theme retains a white glyph, it requires a thick continuous Dark Ink keyline that remains visible at the least-contrasting point of every gradient and glow state.
+
+- Stroke 500 on Navy 800 is decorative only; it is approximately `1.97:1`.
+- Use `#4679A8` or brighter for meaningful interactive outlines on Navy 800.
+- Disabled `#536A86` is not permitted for small functional text.
+- Use Text Muted `#8199B5` or brighter for small secondary text on Navy 800.
+- Validate all final themes against WCAG 2.2 text, non-text contrast, and use-of-color criteria.
 
 ## 4. Typography
 
@@ -189,7 +202,7 @@ The board may shift vertically by up to 80 px on compact devices, but its center
 - Bevel band: 16 px.
 - Resting elevation: 12 px visual depth.
 - Symbol: 112 × 112 px optical box, 16–20 px stroke.
-- Pad symbol remains upright during Shuffle movement.
+- Pad symbol remains upright during Shift movement.
 
 ### Sequence ring
 
@@ -270,7 +283,7 @@ Minimum separation between unrelated buttons is 24 px.
 | Correct ripple | 260 ms | Fast expansion and fade |
 | Error shake | 320 ms | Three diminishing offsets |
 | Turn transfer | 450 ms | Circular sweep |
-| Shuffle move | 650 ms | Clear arc with ease-in-out |
+| Shift move | 650 ms | Clear one-slot clockwise arc with ease-in-out |
 | Twist card arm | 380 ms | Lift, tilt, settle |
 | Rally point pip | 500 ms | Pop with one overshoot |
 | Result modal | 420 ms | Scale 92% to 100% plus fade |
@@ -278,7 +291,7 @@ Minimum separation between unrelated buttons is 24 px.
 ### Reduced Motion
 
 - No pad breathing.
-- Shuffle crossfades positions with numbered slot markers instead of orbiting.
+- Shift crossfades positions with numbered slot markers instead of orbiting.
 - Turn transfer uses color fade, not a sweeping ring.
 - Result screen uses fade only.
 - Essential state changes remain at least 150 ms so they are perceivable.
@@ -307,7 +320,7 @@ Minimum separation between unrelated buttons is 24 px.
 ### Required icon set
 
 - Circle, triangle, square, star identities.
-- Reverse, Shuffle, Echo, Rush, Blackout.
+- Reverse, Shift, Echo, Rush, Blackout.
 - Play, pause, resume, restart, home, settings, sound, music, haptics.
 - Reduce Motion, High Contrast, help, close, crown, versus, lock.
 - Correct, wrong, timer, charge pip, player badge.

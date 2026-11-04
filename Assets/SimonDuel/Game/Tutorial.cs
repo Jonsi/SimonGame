@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SimonDuel.Game
 {
-    // Learn by playing: watch, repeat, add one, see the other side copy it, then one Twist.
+    // Learn by playing: watch, repeat, add one, see the new step from the other side, then one Twist.
     public class Tutorial : MonoBehaviour
     {
         [SerializeField] PadBoard board;
@@ -33,7 +33,7 @@ namespace SimonDuel.Game
 
             var pattern = new List<PadId> { PadId.Circle, PadId.Star };
             yield return Say("LEARN BY PLAYING");
-            yield return Task("WATCH THE PADS", "NOW PRESS THE SAME PADS", pattern, false);
+            yield return Task("WATCH THE PADS", "NOW PRESS THE SAME PADS", pattern, false, true);
 
             screen.ShowBanner("ADD ONE: PRESS ANY PAD");
             yield return WaitForPress();
@@ -42,33 +42,39 @@ namespace SimonDuel.Game
             sounds.Play(GameSound.Done);
             yield return Say("THAT STEP IS NOW PART OF THE PATTERN");
 
-            screen.ShowBanner("THE OTHER PLAYER MUST COPY IT ALL");
+            screen.ShowBanner("THE OTHER PLAYER COPIES IT");
             yield return PlayPattern(pattern, true);
             var added = pattern[pattern.Count - 1] == PadId.Triangle ? PadId.Square : PadId.Triangle;
             pattern.Add(added);
-            board.Find(added).Press();
-            yield return Say("AND ADDS ONE MORE FOR YOU");
+            screen.ShowBanner("WATCH: THE NEW STEP SHOWS ONLY ONCE");
+            yield return new WaitForSeconds(timing.tutorialGapSeconds * 4f);
+            board.Find(added).Play(timing.newStepSeconds);
+            yield return new WaitForSeconds(timing.newStepSeconds + timing.tutorialGapSeconds);
 
-            yield return Task("YOUR TURN: WATCH", "REPEAT THE LONGER PATTERN", pattern, false);
+            yield return Task("", "NOW PRESS THE WHOLE PATTERN", pattern, false, false);
 
             sounds.Play(GameSound.Twist);
             yield return Say("TWISTS CHANGE THE RULE FOR ONE TURN");
-            yield return Task("REVERSE: WATCH", "NOW PRESS IT BACK TO FRONT", pattern, true);
+            yield return Task("", "REVERSE: PRESS IT BACK TO FRONT", pattern, true, false);
 
             yield return Say("ONE SLIP AND THE OTHER PLAYER SCORES");
             sounds.Play(GameSound.Point);
             yield return Say("FIRST TO 2 POINTS WINS. GOOD LUCK!");
         }
 
-        IEnumerator Task(string watch, string ask, List<PadId> pattern, bool backwards)
+        IEnumerator Task(string watch, string ask, List<PadId> pattern, bool backwards, bool showFirst)
         {
             var answer = new List<PadId>(pattern);
             if (backwards) answer.Reverse();
 
+            bool show = showFirst;
             while (true)
             {
-                screen.ShowBanner(watch);
-                yield return PlayPattern(pattern, false);
+                if (show)
+                {
+                    if (watch.Length > 0) screen.ShowBanner(watch);
+                    yield return PlayPattern(pattern, false);
+                }
                 screen.ShowBanner(ask);
 
                 bool slipped = false;
@@ -88,6 +94,7 @@ namespace SimonDuel.Game
                 }
 
                 if (!slipped) break;
+                show = true;
                 yield return Say("NOT QUITE. WATCH AGAIN");
             }
 

@@ -9,6 +9,7 @@ namespace SimonDuel.Rules
     {
         public int ralliesToWin = 2;
         public int startingSteps = 2;
+        public bool replayEachTurn = false;     // off in a duel: the pattern shows once, then only each new step
 
         public int timerBaseMs = 3000;
         public int timerPerStepMs = 750;

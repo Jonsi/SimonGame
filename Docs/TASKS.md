@@ -94,7 +94,7 @@ Rules (tested without opening the app):
 On screen:
 
 - [x] **3.11** Turn order on screen: whose turn → watch → short pause → repeat → add one → hand over. Done 4 Nov 2026; owner removed the "click when ready" step the same day, so a turn starts by itself.
-- [x] **3.12** Watch: pads light and sound in order at the right speed. Taps are ignored meanwhile. Done 4 Nov 2026.
+- [x] **3.12** Watch: pads light and sound in order at the right speed. Taps are ignored meanwhile. Owner, 4 Nov 2026: only on a rally's first turn; after that only the new step shows, at a fixed speed. Done 4 Nov 2026.
 - [x] **3.13** Repeat: the timer runs; a slip ends the rally and shows the pad that was expected. Done 4 Nov 2026.
 - [x] **3.14** Add one: "ADD ONE" shows; the chosen pad plays once and joins the pattern. Done 4 Nov 2026.
 - [x] **3.15** Hand over: the banner names the next player and the ring sweeps round, then the turn starts by itself. Done 4 Nov 2026.
@@ -304,7 +304,7 @@ You can try at the end: a full match with a friend on another phone, live or tur
 - [ ] **11.10** Ask for notifications at the first friend match ("Tell me when it's my turn?"); the game still works if refused.
 - [ ] **11.11** "Your turn" notifications when the other player is away. Under 18: "your turn" only, never offers.
 - [ ] **11.12** "Your online games" screen: live now, your turn, their turn.
-- [ ] **11.13** "Their turn, replayed" before your own turn (skippable).
+- [ ] **11.13** Show the other player's new step, once, before your own turn.
 - [ ] **11.14** 24-hour turn limit and what happens when it runs out.
 - [ ] **11.15** Leaving mid-turn: 10 seconds to come back, then it counts as a timeout.
 - [ ] **11.16** Online rematch; online friends join your rivalries; past opponents become your friend list.

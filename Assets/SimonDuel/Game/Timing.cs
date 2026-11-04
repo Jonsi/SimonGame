@@ -9,6 +9,7 @@ namespace SimonDuel.Game
         public float ownershipSeconds = 1.1f;   // the turn starts by itself after this
         public float readyBeatSeconds = 0.35f;
         public float addOneHoldSeconds = 0.42f;
+        public float newStepSeconds = 0.75f;    // the added step shows at this fixed pace, however fast the player pressed
         public float rallyLossRevealSeconds = 1.10f;
         public float pointCelebrationSeconds = 1.40f;
 
