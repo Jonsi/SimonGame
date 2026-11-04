@@ -1,6 +1,6 @@
 # Simon Duel — house rules for this repo
 
-Portrait memory duel built in Unity under CuzGames: computer browser first, then phone browsers, then iOS/Android apps. Step 1 in progress (4 Nov 2026).
+Memory duel built in Unity under CuzGames: widescreen in a computer browser first, then phone browsers, then iOS/Android apps. Step 1 in progress (4 Nov 2026).
 
 ## Where things are
 

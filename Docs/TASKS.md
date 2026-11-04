@@ -58,21 +58,21 @@ Get it running in your computer's browser:
 
 You can try at the end: click the four pads in your computer's browser, or press keys 1–4; each one lights and sounds the instant you press.
 
-- [ ] **2.01** Make the rules area: a part of the code with no Unity inside, plus its test area. It knows the four pads: Circle, Triangle, Square, Star. *Done when* a first test passes.
-- [ ] **2.02** Make the "Feel" settings file: every timing and size for the pads as a named number.
-- [ ] **2.03** Screen scaling: lay out at 1080 × 1920 and scale to fit the browser window.
-- [ ] **2.04** Draw four plain pads in the right colors, with dark symbols, at the Art Bible positions.
-- [ ] **2.05** Press: react when the mouse button or finger goes down, not when it lifts. Each tap area is bigger than its pad. Only the first finger counts; taps outside the pads do nothing.
-- [ ] **2.06** Light: a pad brightens the moment it is touched and settles back.
-- [ ] **2.07** Make four stand-in tones (E4, G4, B4, E5) as short, clean sound files. The final sounds come in the sound track.
-- [ ] **2.08** Sound: each pad plays its tone in the same instant as its light.
-- [ ] **2.10** Check the four sounds start together with the light in Safari and Chrome on this computer.
-- [ ] **2.12** Run smoothly at the browser's own frame rate (usually 60).
-- [ ] **2.13** Touch log: one line per tap (which pad, how long it took to react) and one summary line per second.
-- [ ] **2.14** Keys 1–4 and mouse clicks press the pads, in the browser as well as the Editor.
+- [x] **2.01** Make the rules area: a part of the code with no Unity inside, plus its test area. It knows the four pads: Circle, Triangle, Square, Star. *Done when* a first test passes. Done 4 Nov 2026: first test passes.
+- [x] **2.02** Make the "Feel" settings file: every timing and size for the pads as a named number. Done 4 Nov 2026.
+- [x] **2.03** Screen scaling: lay out at 1920 × 1080 (widescreen layout W1) and fill the browser window. Done 4 Nov 2026.
+- [x] **2.04** Draw four plain pads in the right colors, with dark symbols, at the Art Bible positions. Done 4 Nov 2026 (stand-in shapes).
+- [x] **2.05** Press: react when the mouse button or finger goes down, not when it lifts. Each tap area is bigger than its pad. Only the first finger counts; taps outside the pads do nothing. Done 4 Nov 2026 for mouse; finger checks are M.07.
+- [x] **2.06** Light: a pad brightens the moment it is touched and settles back. Done 4 Nov 2026.
+- [x] **2.07** Make four stand-in tones (E4, G4, B4, E5) as short, clean sound files. The final sounds come in the sound track. Done 4 Nov 2026: low to high, Circle, Square, Triangle, Star.
+- [x] **2.08** Sound: each pad plays its tone in the same instant as its light. Done 4 Nov 2026: the owner checked it.
+- [x] **2.10** Check the four sounds start together with the light in Safari and Chrome on this computer. Done 4 Nov 2026: the owner checked it in both browsers.
+- [x] **2.12** Run smoothly at the browser's own frame rate (usually 60). Done 4 Nov 2026: the log shows the browser's full rate.
+- [x] **2.13** Touch log: one line per tap (which pad, how long it took to react) and one summary line per second. Done 4 Nov 2026.
+- [x] **2.14** Keys 1–4 and mouse clicks press the pads, in the browser as well as the Editor. Done 4 Nov 2026.
 - [ ] **2.15** **You:** click fast and slow while filming the screen with your phone's slow-motion camera. We count frames from click to light and sound. *Done when* it feels instant (under about 80 ms).
-- [ ] **2.16** Only if sound is late in a browser: play the tones through the browser's own sound system directly, as a small add-on.
-- [ ] **2.17** **You:** say how it feels. Your words go in the journal.
+- [x] **2.16** Only if sound is late in a browser: play the tones through the browser's own sound system directly, as a small add-on. Not needed: the owner reported no late sound, 4 Nov 2026.
+- [x] **2.17** **You:** say how it feels. Your words go in the journal. Done 4 Nov 2026: "Feels good."
 
 ## Step 3 — The duel, plain
 
@@ -164,7 +164,7 @@ You can try at the end: the same game from a private link in your phone's browse
 - [ ] **M.01** **You:** create a free itch.io account under CuzGames, for a private test page. (Was 1.19.)
 - [ ] **M.02** Upload the build to a private itch.io page with a secret link. *Done when* the link opens on your phone over mobile data. (Was 1.20.)
 - [ ] **M.03** Check it in Safari on iPhone and Chrome on Android.
-- [ ] **M.04** Fit phone screens: scale to the phone's width and keep clear of notches and the home bar.
+- [ ] **M.04** An upright phone layout at the Art Bible's 1080 × 1920 sizes, keeping clear of notches and the home bar.
 - [ ] **M.05** Buzz in the browser: works on Android phones; iPhone browsers can't buzz, so nothing happens there. (Was 2.09.)
 - [ ] **M.06** A buzz on/off setting. In the Unity Editor the buzz only writes to the log. (Was 2.11.)
 - [ ] **M.07** Check touch: only the first finger counts, and taps outside the pads do nothing.

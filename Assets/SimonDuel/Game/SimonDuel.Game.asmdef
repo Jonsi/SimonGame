@@ -1,0 +1,5 @@
+{
+    "name": "SimonDuel.Game",
+    "rootNamespace": "SimonDuel.Game",
+    "references": ["SimonDuel.Rules", "Unity.InputSystem", "UnityEngine.UI"]
+}

@@ -7,14 +7,13 @@
     <title>{{{ PRODUCT_NAME }}}</title>
     <style>
       html, body { margin: 0; height: 100%; background: #030817; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
-      /* A 9:16 portrait stage: fills a phone held upright, centred on wider screens. */
-      #stage { position: absolute; inset: 0; margin: auto; height: 100%; aspect-ratio: 9 / 16; max-width: 100%; background: #050B1D; }
-      @supports not (aspect-ratio: 9 / 16) { #stage { width: 56.25vh; } }
+      /* The game fills the whole window. */
+      #stage { position: fixed; inset: 0; background: #050B1D; }
       #unity-canvas { width: 100%; height: 100%; display: block; background: #050B1D; outline: none; }
       #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; font: 800 24px/1 system-ui, -apple-system, sans-serif; letter-spacing: .06em; color: #F7FBFF; }
       #loading .name b:first-child { color: #FF9418; }
       #loading .name b:last-child { color: #20D7ED; }
-      #bar { width: 56%; height: 10px; border-radius: 5px; background: #0B2242; overflow: hidden; }
+      #bar { width: min(420px, 56%); height: 10px; border-radius: 5px; background: #0B2242; overflow: hidden; }
       #fill { width: 0; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #FF9418, #20D7ED); transition: width .15s; }
       #warning { position: absolute; left: 8px; right: 8px; top: 8px; color: #07142B; font: 600 14px system-ui, sans-serif; }
     </style>

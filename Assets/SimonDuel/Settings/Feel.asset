@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a4b9fee4f1394babb803cb729f9bfc1, type: 3}
+  m_Name: Feel
+  m_EditorClassIdentifier: SimonDuel.Game::SimonDuel.Game.Feel
+  boardDropFromCenter: 50
+  ringDiameter: 800
+  padSize: {x: 256, y: 256}
+  padHitSize: {x: 280, y: 280}
+  padGap: 24
+  symbolSize: 108
+  glossInset: 22
+  glossOpacity: 0.16
+  rimOutset: 8
+  restingDepth: 12
+  pressedDepth: 3
+  pressedScale: 0.96
+  squashInSeconds: 0.07
+  squashOutSeconds: 0.11
+  lightSettleSeconds: 0.42
+  looks:
+  - rest: {r: 1, g: 0.3529412, b: 0.32156864, a: 1}
+    lit: {r: 1, g: 0.5686275, b: 0.53333336, a: 1}
+    depth: {r: 0.7254902, g: 0.18431373, b: 0.23529412, a: 1}
+  - rest: {r: 1, g: 0.7764706, b: 0.18039216, a: 1}
+    lit: {r: 1, g: 0.89411765, b: 0.46666667, a: 1}
+    depth: {r: 0.78431374, g: 0.5372549, b: 0, a: 1}
+  - rest: {r: 0.25882354, g: 0.84313726, b: 0.6039216, a: 1}
+    lit: {r: 0.5294118, g: 0.92156863, b: 0.7607843, a: 1}
+    depth: {r: 0.08627451, g: 0.5568628, b: 0.40392157, a: 1}
+  - rest: {r: 0.16862746, g: 0.6156863, b: 0.95686275, a: 1}
+    lit: {r: 0.4745098, g: 0.7882353, b: 1, a: 1}
+    depth: {r: 0.07058824, g: 0.37254903, b: 0.6862745, a: 1}
+  symbolColor: {r: 0.02745098, g: 0.078431375, b: 0.16862746, a: 1}

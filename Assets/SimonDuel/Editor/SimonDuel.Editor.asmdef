@@ -1,0 +1,6 @@
+{
+    "name": "SimonDuel.Editor",
+    "rootNamespace": "SimonDuel.EditorTools",
+    "references": ["SimonDuel.Rules", "SimonDuel.Game", "Unity.InputSystem", "UnityEngine.UI", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Core.Runtime"],
+    "includePlatforms": ["Editor"]
+}

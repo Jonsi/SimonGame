@@ -10,6 +10,7 @@
 - One Unity game, three ways to play: against the computer, two players on one phone, and online with friends.
 - **Browser first** (owner, 3 Nov 2026): the game is built and tested as a web page that opens from a link on any phone or computer; the iPhone and Android apps follow from the same project after the checkpoint. Company: CuzGames.
 - **Computer before phone** (owner, 4 Nov 2026): steps 1–6 are built and tried in a computer browser with mouse and keys. Phone browsers follow as their own step before the checkpoint, including re-checking speeds for thumbs.
+- **Widescreen on computer** (owner, 4 Nov 2026, layout W1 "Face-off"): one shared board in the middle, a player panel on each side, laid out at 1920 × 1080 and filling the window. The Art Bible's sizes are for the upright phone layout, which is built in the Phone browser step.
 - The rules are written once and shared by all three, so online can never play differently from the phone version.
 - Each turn is played entirely on one phone; only the result travels. A weak connection never costs anyone a turn.
 - Build order: the four pads → the plain duel → Twists → the computer → a checkpoint with real players → the look → all screens → meta → money and permissions → online → store.
