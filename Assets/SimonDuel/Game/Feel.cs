@@ -26,6 +26,13 @@ namespace SimonDuel.Game
         public float squashOutSeconds = 0.11f;
         public float lightSettleSeconds = 0.42f;
 
+        [Header("Pattern playback and slips")]
+        public float playbackScale = 1.04f;
+        public float wrongShakePixels = 16f;
+        public float wrongShakeSeconds = 0.32f;
+        public float wrongShakeTurns = 3f;
+        public Color wrongRimColor = new Color32(0xFF, 0x46, 0x58, 0xFF);
+
         [Header("Colors, in pad order: Circle, Triangle, Square, Star")]
         public PadLook[] looks =
         {
@@ -35,6 +42,11 @@ namespace SimonDuel.Game
             new PadLook { rest = new Color32(0x2B, 0x9D, 0xF4, 0xFF), lit = new Color32(0x79, 0xC9, 0xFF, 0xFF), depth = new Color32(0x12, 0x5F, 0xAF, 0xFF) },
         };
         public Color symbolColor = new Color32(0x07, 0x14, 0x2B, 0xFF);
+        public Color[] playerColors =
+        {
+            new Color32(0xFF, 0x94, 0x18, 0xFF),
+            new Color32(0x20, 0xD7, 0xED, 0xFF),
+        };
     }
 
     [Serializable]

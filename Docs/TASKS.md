@@ -80,32 +80,32 @@ You can try at the end: a full two-player match on one computer's browser, swapp
 
 Rules (tested without opening the app):
 
-- [ ] **3.01** "Duel rules" settings: rallies to win (2, so best of 3), a 2-step start, timer 3.0 s + 0.75 s per step up to 14 s, and every other rule number.
-- [ ] **3.02** One seeded random source: the same seed always gives the same match.
-- [ ] **3.03** Match state: players, score, who starts, the pattern, whose turn.
-- [ ] **3.04** Start a rally: a random 2-step pattern; random first starter, then alternate each rally.
-- [ ] **3.05** Turn plan: what must be entered, how fast playback goes for this length, the time allowed.
-- [ ] **3.06** Check each tap: right, finished, or wrong (and what was expected).
-- [ ] **3.07** Add one step and hand the turn over.
-- [ ] **3.08** Time running out loses the rally.
-- [ ] **3.09** Rally and match end: first to 2 rallies wins; Rematch flips who starts.
-- [ ] **3.10** Match record: the seed plus every move, enough to replay a match exactly. A test replays one and gets the same result.
+- [x] **3.01** "Duel rules" settings: rallies to win (2, so best of 3), a 2-step start, timer 3.0 s + 0.75 s per step up to 14 s, and every other rule number. Done 4 Nov 2026.
+- [x] **3.02** One seeded random source: the same seed always gives the same match. Done 4 Nov 2026.
+- [x] **3.03** Match state: players, score, who starts, the pattern, whose turn. Done 4 Nov 2026.
+- [x] **3.04** Start a rally: a random 2-step pattern; random first starter, then alternate each rally. Done 4 Nov 2026.
+- [x] **3.05** Turn plan: what must be entered, how fast playback goes for this length, the time allowed. Done 4 Nov 2026.
+- [x] **3.06** Check each tap: right, finished, or wrong (and what was expected). Done 4 Nov 2026.
+- [x] **3.07** Add one step and hand the turn over. Done 4 Nov 2026.
+- [x] **3.08** Time running out loses the rally. Done 4 Nov 2026.
+- [x] **3.09** Rally and match end: first to 2 rallies wins; Rematch flips who starts. Done 4 Nov 2026.
+- [x] **3.10** Match record: the seed plus every move, enough to replay a match exactly. A test replays one and gets the same result. Done 4 Nov 2026.
 
 On screen:
 
-- [ ] **3.11** Turn order on screen: whose turn → "tap when ready" → watch → short pause → repeat → add one → hand over.
-- [ ] **3.12** Watch: pads light and sound in order at the right speed. Taps are ignored meanwhile.
-- [ ] **3.13** Repeat: the timer runs; a slip ends the rally and shows the pad that was expected.
-- [ ] **3.14** Add one: "ADD ONE" shows; the chosen pad plays once and joins the pattern.
-- [ ] **3.15** Hand over: "Player 2, tap when ready", so the pattern never starts while the players are still swapping.
-- [ ] **3.16** Plain top bar: names, score pips, state word (WATCH / REPEAT / ADD ONE), pattern length, timer bar.
-- [ ] **3.17** Rally result: the slip for a moment, then the point to the other side.
-- [ ] **3.18** Match result: winner, score, a big Rematch button, a smaller Home button.
-- [ ] **3.19** Leaving the app pauses the game and hides the pattern; coming back resumes it.
-- [ ] **3.20** Duel log: one line per second and one per event.
-- [ ] **3.21** Pretend players in the Editor: keys for "play it right", "slip" and "time out".
-- [ ] **3.22** Automatic test: a whole match with pretend players ends with the right winner.
-- [ ] **3.23** **You:** play a full match with someone on your computer. Your notes go in the journal.
+- [x] **3.11** Turn order on screen: whose turn → "tap when ready" → watch → short pause → repeat → add one → hand over. Done 4 Nov 2026 ("click when ready" on the computer).
+- [x] **3.12** Watch: pads light and sound in order at the right speed. Taps are ignored meanwhile. Done 4 Nov 2026.
+- [x] **3.13** Repeat: the timer runs; a slip ends the rally and shows the pad that was expected. Done 4 Nov 2026.
+- [x] **3.14** Add one: "ADD ONE" shows; the chosen pad plays once and joins the pattern. Done 4 Nov 2026.
+- [x] **3.15** Hand over: "Player 2, tap when ready", so the pattern never starts while the players are still swapping. Done 4 Nov 2026.
+- [x] **3.16** Widescreen panels and banner: names, score pips, state word (WATCH / REPEAT / ADD ONE), pattern length, the ring as the timer. Done 4 Nov 2026.
+- [x] **3.17** Rally result: the slip for a moment, then the point to the other side. Done 4 Nov 2026.
+- [x] **3.18** Match result: winner, score, a big Rematch button, a smaller Home button. Done 4 Nov 2026.
+- [x] **3.19** Leaving the app pauses the game and hides the pattern; coming back resumes it. Done 4 Nov 2026.
+- [x] **3.20** Duel log: one line per second and one per event. Done 4 Nov 2026.
+- [x] **3.21** Pretend players in the Editor: keys for "play it right", "slip" and "time out". Done 4 Nov 2026: F1 right, F2 slip, F3 out of time, in test builds only.
+- [x] **3.22** Automatic test: a whole match with pretend players ends with the right winner. Done 4 Nov 2026: 19 tests pass.
+- [x] **3.23** **You:** play a full match with someone on your computer. Your notes go in the journal. Done 4 Nov 2026: "Feels good."
 
 ## Step 4 — Tuning from real games
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SimonDuel.Rules;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
@@ -11,7 +12,7 @@ namespace SimonDuel.Game
     {
         [SerializeField] Feel feel;
         [SerializeField] Pad[] pads;
-        [SerializeField] Boot boot;
+        [SerializeField] DuelRunner runner;
 
         readonly List<InputAction> actions = new List<InputAction>();
         RectTransform board;
@@ -51,9 +52,16 @@ namespace SimonDuel.Game
             actions.Clear();
         }
 
+        public Pad Find(PadId id)
+        {
+            foreach (var pad in pads)
+                if (pad.Id == id) return pad;
+            throw new System.ArgumentException($"No pad for {id}");
+        }
+
         void OnPointerPress(InputAction.CallbackContext context)
         {
-            if (boot.TryStart()) return;
+            if (runner.PressAnywhere()) return;
 
             var pointer = (Pointer)context.control.device;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(board, pointer.position.ReadValue(), null, out var point);
@@ -67,13 +75,13 @@ namespace SimonDuel.Game
 
         void OnKeyPress(Pad pad, InputAction.CallbackContext context)
         {
-            if (boot.TryStart()) return;
+            if (runner.PressAnywhere()) return;
             Press(pad, "key", context.time);
         }
 
         void Press(Pad pad, string source, double inputTime)
         {
-            pad.Press();
+            runner.PressPad(pad);
             double react = (InputState.currentTime - inputTime) * 1000d;
             taps++;
             reactTotal += react;

@@ -20,6 +20,11 @@ namespace SimonDuel.Game
         PadLook look;
         Vector2 center;
         float pressedAt = float.NegativeInfinity;
+        float lightSeconds;
+        float peakScale;
+        float depthChange;
+        float shakePixels;
+        Color rimColor = Color.white;
 
         public PadId Id => id;
 
@@ -50,6 +55,8 @@ namespace SimonDuel.Game
             gloss.color = new Color(1f, 1f, 1f, feel.glossOpacity);
             symbol.color = feel.symbolColor;
             symbol.rectTransform.sizeDelta = Vector2.one * feel.symbolSize;
+            lightSeconds = feel.lightSettleSeconds;
+            peakScale = feel.pressedScale;
             Show(float.PositiveInfinity);
         }
 
@@ -59,8 +66,31 @@ namespace SimonDuel.Game
             return Mathf.Abs(offset.x) <= feel.padHitSize.x / 2f && Mathf.Abs(offset.y) <= feel.padHitSize.y / 2f;
         }
 
+        // A player's press: dips into the board.
         public void Press()
         {
+            Light(feel.lightSettleSeconds, feel.pressedScale, feel.restingDepth - feel.pressedDepth, 0f, Color.white);
+        }
+
+        // One step of the pattern, or the step that should have been pressed.
+        public void Play(float seconds)
+        {
+            Light(seconds, feel.playbackScale, 0f, 0f, Color.white);
+        }
+
+        // A press on the wrong pad.
+        public void ShowWrong()
+        {
+            Light(feel.wrongShakeSeconds, feel.pressedScale, feel.restingDepth - feel.pressedDepth, feel.wrongShakePixels, feel.wrongRimColor);
+        }
+
+        void Light(float seconds, float scale, float depthDrop, float shake, Color rimTint)
+        {
+            lightSeconds = seconds;
+            peakScale = scale;
+            depthChange = depthDrop;
+            shakePixels = shake;
+            rimColor = rimTint;
             pressedAt = Time.unscaledTime;
             tone.Stop();
             tone.Play();
@@ -78,11 +108,18 @@ namespace SimonDuel.Game
                 ? 1f - Mathf.Pow(1f - sincePress / feel.squashInSeconds, 2f)
                 : 1f - Mathf.Clamp01((sincePress - feel.squashInSeconds) / feel.squashOutSeconds);
 
-            transform.localScale = Vector3.one * Mathf.Lerp(1f, feel.pressedScale, squash);
-            face.anchoredPosition = new Vector2(0f, -squash * (feel.restingDepth - feel.pressedDepth));
-            float settled = Mathf.SmoothStep(0f, 1f, sincePress / feel.lightSettleSeconds);
+            float shake = 0f;
+            if (sincePress < feel.wrongShakeSeconds)
+            {
+                float progress = sincePress / feel.wrongShakeSeconds;
+                shake = shakePixels * (1f - progress) * Mathf.Sin(progress * feel.wrongShakeTurns * 2f * Mathf.PI);
+            }
+
+            transform.localScale = Vector3.one * Mathf.Lerp(1f, peakScale, squash);
+            face.anchoredPosition = new Vector2(shake, -squash * depthChange);
+            float settled = Mathf.SmoothStep(0f, 1f, sincePress / lightSeconds);
             shape.color = Color.Lerp(look.lit, look.rest, settled);
-            rim.color = new Color(1f, 1f, 1f, 1f - settled);
+            rim.color = new Color(rimColor.r, rimColor.g, rimColor.b, 1f - settled);
         }
     }
 }

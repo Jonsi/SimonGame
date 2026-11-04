@@ -16,6 +16,8 @@ Memory duel built in Unity under CuzGames: widescreen in a computer browser firs
 - Unity 6000.3.23f1 (6.3 LTS), project at the repo root. Web build, with the project closed in Unity:
   `/Applications/Unity/Hub/Editor/6000.3.23f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath . -executeMethod SimonDuel.EditorTools.WebBuild.Build -logFile Logs/web-build.log`
   With Unity open, use the menu: CuzGames > Build for Web. Output goes to `Builds/Web` (not in git).
+  Add `-buildPath <folder> -development` for a test build with pretend-player keys (F1 right, F2 slip, F3 out of time).
+- Tests, with the project closed in Unity: same command with `-runTests -testPlatform EditMode -testResults <file>` in place of `-quit` and `-executeMethod ...`.
 - Try it on this Mac: `python3 -m http.server 8765 --bind 127.0.0.1 --directory Builds/Web`, then open http://127.0.0.1:8765/.
 - Logs: in the browser's developer console while the game runs; the Unity Editor's is `~/Library/Logs/Unity/Editor.log`.
 - Phone browser link and phone apps: not set up yet (tasks M.01–M.03, then the phone track).

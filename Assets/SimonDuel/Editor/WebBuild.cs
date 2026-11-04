@@ -7,7 +7,8 @@ using UnityEngine;
 namespace SimonDuel.EditorTools
 {
     // Builds the browser version. From the menu: CuzGames > Build for Web.
-    // From a terminal: Unity -batchmode -quit -projectPath . -executeMethod SimonDuel.EditorTools.WebBuild.Build [-buildPath <folder>]
+    // From a terminal: Unity -batchmode -quit -projectPath . -executeMethod SimonDuel.EditorTools.WebBuild.Build [-buildPath <folder>] [-development]
+    // -development adds the pretend-player keys (F1 right, F2 slip, F3 out of time).
     public static class WebBuild
     {
         const string DefaultPath = "Builds/Web";
@@ -26,7 +27,7 @@ namespace SimonDuel.EditorTools
                 scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
                 locationPathName = path,
                 target = BuildTarget.WebGL,
-                options = BuildOptions.None,
+                options = System.Array.IndexOf(args, "-development") >= 0 ? BuildOptions.Development : BuildOptions.None,
             });
 
             long bytes = Directory.Exists(path)

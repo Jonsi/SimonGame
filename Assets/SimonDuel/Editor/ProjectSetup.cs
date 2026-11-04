@@ -24,6 +24,8 @@ namespace SimonDuel.EditorTools
         const int Build = 1;
         const string AppScenePath = "Assets/SimonDuel/Scenes/App.unity";
         const string FeelPath = "Assets/SimonDuel/Settings/Feel.asset";
+        const string DuelRulesPath = "Assets/SimonDuel/Settings/DuelRules.asset";
+        const string TimingPath = "Assets/SimonDuel/Settings/Timing.asset";
         const string StandInArt = "Assets/SimonDuel/Art/StandIn/";
         const string StandInAudio = "Assets/SimonDuel/Audio/StandIn/";
 
@@ -147,20 +149,41 @@ namespace SimonDuel.EditorTools
 
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
-            var board = BuildBoard(canvasGo.transform);
-            BuildBanner(canvasGo.transform, font);
-            BuildPlayerPanel(canvasGo.transform, font, -699, "1", "PLAYER 1", Player1, 2, true);
-            BuildPlayerPanel(canvasGo.transform, font, 699, "2", "PLAYER 2", Player2, 1, false);
-            Place(MakeText(canvasGo.transform, "Length", "LENGTH 6", font, 30, TextMuted).rectTransform, 0, -498, 400, 50);
+            var feel = LoadSettings<Feel>(FeelPath);
+            var rules = LoadSettings<DuelRules>(DuelRulesPath);
+            var timing = LoadSettings<Timing>(TimingPath);
+
+            var board = BuildBoard(canvasGo.transform, feel, out var timerRing);
+            var banner = BuildBanner(canvasGo.transform, font, out var bannerText);
+            var panels = new[]
+            {
+                BuildPlayerPanel(canvasGo.transform, font, -699, "1", "PLAYER 1", rules.rules.ralliesToWin),
+                BuildPlayerPanel(canvasGo.transform, font, 699, "2", "PLAYER 2", rules.rules.ralliesToWin),
+            };
+            var length = MakeText(canvasGo.transform, "Length", "LENGTH 2", font, 30, TextMuted);
+            Place(length.rectTransform, 0, -498, 400, 50);
 
             var version = MakeText(canvasGo.transform, "Version", $"{Version} ({Build})", font, 24, TextMuted);
             version.alignment = TextAnchor.LowerRight;
             Stretch(version.rectTransform, new Vector2(0, 0), new Vector2(1, 0.06f), new Vector2(-32, 0));
 
-            var cover = new GameObject("TapToStart", typeof(RectTransform), typeof(Image));
-            cover.transform.SetParent(canvasGo.transform, false);
-            cover.GetComponent<Image>().color = new Color(Navy950.r, Navy950.g, Navy950.b, 0.9f);
-            Stretch((RectTransform)cover.transform, Vector2.zero, Vector2.one);
+            var paused = BuildCover(canvasGo.transform, "Paused", 1f);
+            var pausedText = MakeText(paused.transform, "Text", "Paused: click to carry on", font, 54, TextSecondary);
+            Stretch(pausedText.rectTransform, Vector2.zero, Vector2.one);
+            paused.SetActive(false);
+
+            var result = BuildCover(canvasGo.transform, "MatchResult", 0.96f);
+            var resultTitle = MakeText(result.transform, "Title", "PLAYER 1 WINS", font, 110, Color.white);
+            Place(resultTitle.rectTransform, 0, 210, 1400, 150);
+            var resultScore = MakeText(result.transform, "Score", "2 - 1", font, 90, TextSecondary);
+            Place(resultScore.rectTransform, 0, 70, 600, 120);
+            var rematch = MakeButton(result.transform, "Rematch", "REMATCH", font, 44, Player1, Cavity);
+            Place((RectTransform)rematch.transform, 0, -90, 460, 110);
+            var home = MakeButton(result.transform, "Home", "Home", font, 30, Raised, TextSecondary);
+            Place((RectTransform)home.transform, 0, -220, 220, 72);
+            result.SetActive(false);
+
+            var cover = BuildCover(canvasGo.transform, "TapToStart", 0.9f);
             var title = MakeText(cover.transform, "Title", "<color=#FF9418>SIMON</color> <color=#20D7ED>DUEL</color>", font, 170, Color.white);
             title.raycastTarget = false;
             Place(title.rectTransform, 0, 90, 1600, 240);
@@ -172,9 +195,16 @@ namespace SimonDuel.EditorTools
             var so = new SerializedObject(boot);
             so.FindProperty("tapToStart").objectReferenceValue = cover;
             so.ApplyModifiedPropertiesWithoutUndo();
-            var boardSo = new SerializedObject(board);
-            boardSo.FindProperty("boot").objectReferenceValue = boot;
-            boardSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var duelScreen = canvasGo.AddComponent<DuelScreen>();
+            Wire(duelScreen, ("feel", feel), ("banner", bannerText), ("bannerLine", banner), ("length", length), ("timerRing", timerRing),
+                ("pausedCover", paused), ("resultCover", result), ("resultTitle", resultTitle), ("resultScore", resultScore),
+                ("rematch", rematch), ("home", home));
+            WireList(duelScreen, "players", panels);
+
+            var runner = canvasGo.AddComponent<DuelRunner>();
+            Wire(runner, ("rules", rules), ("timing", timing), ("board", board), ("screen", duelScreen), ("boot", boot));
+            Wire(board, ("runner", runner));
 
             System.IO.Directory.CreateDirectory("Assets/SimonDuel/Scenes");
             EditorSceneManager.SaveScene(scene, AppScenePath);
@@ -188,15 +218,57 @@ namespace SimonDuel.EditorTools
             Debug.Log($"[Setup] scene={AppScenePath} is the only scene in the build");
         }
 
-        static PadBoard BuildBoard(Transform canvas)
+        static T LoadSettings<T>(string path) where T : ScriptableObject
         {
-            var feel = AssetDatabase.LoadAssetAtPath<Feel>(FeelPath);
-            if (feel == null)
+            var settings = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (settings == null)
             {
-                feel = ScriptableObject.CreateInstance<Feel>();
-                AssetDatabase.CreateAsset(feel, FeelPath);
+                settings = ScriptableObject.CreateInstance<T>();
+                AssetDatabase.CreateAsset(settings, path);
             }
+            return settings;
+        }
 
+        static void Wire(Object target, params (string field, Object value)[] links)
+        {
+            var so = new SerializedObject(target);
+            foreach (var (field, value) in links)
+                so.FindProperty(field).objectReferenceValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static void WireList(Object target, string field, Object[] values)
+        {
+            var so = new SerializedObject(target);
+            var list = so.FindProperty(field);
+            list.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++)
+                list.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static GameObject BuildCover(Transform canvas, string name, float opacity)
+        {
+            var cover = new GameObject(name, typeof(RectTransform), typeof(Image));
+            cover.transform.SetParent(canvas, false);
+            cover.GetComponent<Image>().color = new Color(Navy950.r, Navy950.g, Navy950.b, opacity);
+            Stretch((RectTransform)cover.transform, Vector2.zero, Vector2.one);
+            return cover;
+        }
+
+        static Button MakeButton(Transform parent, string name, string label, Font font, int size, Color color, Color textColor)
+        {
+            var image = MakeSliced(parent, name, "pill.png", 41, color);
+            image.raycastTarget = true;
+            var button = image.gameObject.AddComponent<Button>();
+            var text = MakeText(image.transform, "Text", label, font, size, textColor);
+            text.raycastTarget = false;
+            Stretch(text.rectTransform, Vector2.zero, Vector2.one);
+            return button;
+        }
+
+        static PadBoard BuildBoard(Transform canvas, Feel feel, out Image timerRing)
+        {
             var go = new GameObject("Board", typeof(RectTransform));
             go.transform.SetParent(canvas, false);
             var rect = (RectTransform)go.transform;
@@ -217,20 +289,15 @@ namespace SimonDuel.EditorTools
             ring.fillMethod = Image.FillMethod.Radial360;
             ring.fillOrigin = (int)Image.Origin360.Top;
             ring.fillClockwise = true;
-            ring.fillAmount = 0.68f;
+            timerRing = ring;
 
             var shape = LoadSprite("pad.png");
             var pads = new Pad[Pads.All.Length];
             for (int i = 0; i < pads.Length; i++)
                 pads[i] = BuildPad(go.transform, Pads.All[i], shape, feel);
 
-            var so = new SerializedObject(board);
-            so.FindProperty("feel").objectReferenceValue = feel;
-            var list = so.FindProperty("pads");
-            list.arraySize = pads.Length;
-            for (int i = 0; i < pads.Length; i++)
-                list.GetArrayElementAtIndex(i).objectReferenceValue = pads[i];
-            so.ApplyModifiedPropertiesWithoutUndo();
+            Wire(board, ("feel", feel));
+            WireList(board, "pads", pads);
             return board;
         }
 
@@ -271,23 +338,24 @@ namespace SimonDuel.EditorTools
             return pad;
         }
 
-        // The state banner above the board. For show until the duel exists (step 3).
-        static void BuildBanner(Transform canvas, Font font)
+        static Image BuildBanner(Transform canvas, Font font, out Text text)
         {
             var line = MakeSliced(canvas, "Banner", "pill.png", 41, Player1);
             Place(line.rectTransform, 0, 456, 570, 84);
             var fill = MakeSliced(line.transform, "Fill", "pill.png", 41, Raised);
             fill.rectTransform.offsetMin = Vector2.one * 3;
             fill.rectTransform.offsetMax = Vector2.one * -3;
-            Stretch(MakeText(line.transform, "Text", "PLAYER 1: REPEAT", font, 36, Color.white).rectTransform, Vector2.zero, Vector2.one);
+            text = MakeText(line.transform, "Text", "", font, 36, Color.white);
+            Stretch(text.rectTransform, Vector2.zero, Vector2.one);
+            return line;
         }
 
-        // One player's side panel. For show until the duel exists (step 3).
-        static void BuildPlayerPanel(Transform canvas, Font font, float x, string number, string label, Color color, int score, bool active)
+        static PlayerPanel BuildPlayerPanel(Transform canvas, Font font, float x, string number, string label, int ralliesToWin)
         {
+            var color = number == "1" ? Player1 : Player2;
             var panel = MakeSliced(canvas, label, "panel.png", 40, Panel);
             Place(panel.rectTransform, x, -15, 390, 690);
-            var line = MakeSliced(panel.transform, "Line", "panel_line.png", 40, active ? color : Line);
+            var line = MakeSliced(panel.transform, "Line", "panel_line.png", 40, Line);
             Stretch(line.rectTransform, Vector2.zero, Vector2.one);
 
             var badge = MakeImage(panel.transform, "Badge", LoadSprite("disc.png"));
@@ -299,27 +367,37 @@ namespace SimonDuel.EditorTools
             Stretch(MakeText(badge.transform, "Number", number, font, 54, color).rectTransform, Vector2.zero, Vector2.one);
 
             Place(MakeText(panel.transform, "Name", label, font, 34, color).rectTransform, 0, 120, 360, 50);
-            for (int i = 0; i < 3; i++)
+            var pips = new Image[ralliesToWin];
+            for (int i = 0; i < pips.Length; i++)
             {
-                var pip = MakeImage(panel.transform, "Pip", LoadSprite("disc.png"));
-                pip.color = i < score ? color : Line;
-                Place(pip.rectTransform, (i - 1) * 34, 72, 22, 22);
+                pips[i] = MakeImage(panel.transform, "Pip", LoadSprite("disc.png"));
+                pips[i].color = Line;
+                Place(pips[i].rectTransform, (i - (pips.Length - 1) / 2f) * 34, 72, 22, 22);
             }
 
-            if (active)
-            {
-                var turn = MakeSliced(panel.transform, "YourTurn", "pill.png", 41, color);
-                Place(turn.rectTransform, 0, 0, 320, 60);
-                Stretch(MakeText(turn.transform, "Text", "YOUR TURN", font, 28, Cavity).rectTransform, Vector2.zero, Vector2.one);
-            }
+            var turn = MakeSliced(panel.transform, "YourTurn", "pill.png", 41, color);
+            Place(turn.rectTransform, 0, 0, 320, 60);
+            Stretch(MakeText(turn.transform, "Text", "YOUR TURN", font, 28, Cavity).rectTransform, Vector2.zero, Vector2.one);
+            turn.gameObject.SetActive(false);
+
+            // Twists arrive in step 5; dimmed until then.
+            var twists = new GameObject("Twists", typeof(RectTransform), typeof(CanvasGroup));
+            twists.transform.SetParent(panel.transform, false);
+            Stretch((RectTransform)twists.transform, Vector2.zero, Vector2.one);
+            twists.GetComponent<CanvasGroup>().alpha = 0.35f;
 
             for (int i = 0; i < 2; i++)
             {
-                var card = MakeSliced(panel.transform, "Twist", "panel.png", 40, Cavity);
+                var card = MakeSliced(twists.transform, "Twist", "panel.png", 40, Cavity);
                 Place(card.rectTransform, i == 0 ? -87 : 87, -220, 160, 180);
                 Stretch(MakeSliced(card.transform, "Line", "panel_line.png", 40, Twist).rectTransform, Vector2.zero, Vector2.one);
                 Stretch(MakeText(card.transform, "Text", i == 0 ? "REVERSE" : "SHIFT", font, 24, TwistText).rectTransform, Vector2.zero, Vector2.one);
             }
+
+            var player = panel.gameObject.AddComponent<PlayerPanel>();
+            Wire(player, ("outline", line), ("yourTurn", turn.gameObject));
+            WireList(player, "pips", pips);
+            return player;
         }
 
         static Image MakeSliced(Transform parent, string name, string file, float border, Color color)
