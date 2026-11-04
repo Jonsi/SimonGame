@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050B1D">
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #030817; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+      /* A 9:16 portrait stage: fills a phone held upright, centred on wider screens. */
+      #stage { position: absolute; inset: 0; margin: auto; height: 100%; aspect-ratio: 9 / 16; max-width: 100%; background: #050B1D; }
+      @supports not (aspect-ratio: 9 / 16) { #stage { width: 56.25vh; } }
+      #unity-canvas { width: 100%; height: 100%; display: block; background: #050B1D; outline: none; }
+      #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; font: 800 24px/1 system-ui, -apple-system, sans-serif; letter-spacing: .06em; color: #F7FBFF; }
+      #loading .name b:first-child { color: #FF9418; }
+      #loading .name b:last-child { color: #20D7ED; }
+      #bar { width: 56%; height: 10px; border-radius: 5px; background: #0B2242; overflow: hidden; }
+      #fill { width: 0; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #FF9418, #20D7ED); transition: width .15s; }
+      #warning { position: absolute; left: 8px; right: 8px; top: 8px; color: #07142B; font: 600 14px system-ui, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="loading"><div class="name"><b>SIMON</b> <b>DUEL</b></div><div id="bar"><div id="fill"></div></div></div>
+      <div id="warning"></div>
+    </div>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      function showBanner(msg, type) {
+        var div = document.createElement("div");
+        div.textContent = msg;
+        div.style = "padding:10px;border-radius:8px;margin-bottom:6px;background:" + (type == "error" ? "#FF4658" : "#FFC62E");
+        document.querySelector("#warning").appendChild(div);
+        if (type != "error") setTimeout(function () { div.remove(); }, 5000);
+      }
+      var buildUrl = "Build";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_THREADS
+        workerUrl: buildUrl + "/{{{ WORKER_FILENAME }}}",
+#endif
+#if USE_WASM
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: showBanner,
+      };
+      var script = document.createElement("script");
+      script.src = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (progress) {
+          document.querySelector("#fill").style.width = (100 * progress) + "%";
+        }).then(function () {
+          document.querySelector("#loading").style.display = "none";
+        }).catch(function (message) {
+          showBanner(message, "error");
+        });
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
