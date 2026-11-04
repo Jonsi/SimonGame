@@ -32,6 +32,7 @@ namespace SimonDuel.Game
         public float wrongShakeSeconds = 0.32f;
         public float wrongShakeTurns = 3f;
         public Color wrongRimColor = new Color32(0xFF, 0x46, 0x58, 0xFF);
+        public Color twistColor = new Color32(0xA6, 0x64, 0xFF, 0xFF);
 
         [Header("Colors, in pad order: Circle, Triangle, Square, Star")]
         public PadLook[] looks =

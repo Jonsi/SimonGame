@@ -14,6 +14,9 @@ namespace SimonDuel.Game
         [SerializeField] Pad[] pads;
         [SerializeField] DuelRunner runner;
 
+        // Which slot is next going clockwise: top-left, top-right, bottom-right, bottom-left.
+        static readonly int[] NextClockwise = { 1, 3, 0, 2 };
+
         readonly List<InputAction> actions = new List<InputAction>();
         RectTransform board;
         float secondStart;
@@ -37,9 +40,9 @@ namespace SimonDuel.Game
 
             for (int i = 0; i < pads.Length; i++)
             {
-                var pad = pads[i];
+                int slot = i;
                 var key = new InputAction(type: InputActionType.Button, binding: $"<Keyboard>/{i + 1}");
-                key.started += context => OnKeyPress(pad, context);
+                key.started += context => OnKeyPress(slot, context);
                 actions.Add(key);
             }
 
@@ -52,11 +55,24 @@ namespace SimonDuel.Game
             actions.Clear();
         }
 
+        public Color TwistColor => feel.twistColor;
+
         public Pad Find(PadId id)
         {
             foreach (var pad in pads)
                 if (pad.Id == id) return pad;
             throw new System.ArgumentException($"No pad for {id}");
+        }
+
+        // Every pad moves one slot clockwise.
+        public void ShiftClockwise(float seconds)
+        {
+            foreach (var pad in pads) pad.SlideToSlot(NextClockwise[pad.Slot], seconds);
+        }
+
+        public void ShiftHome(float seconds)
+        {
+            foreach (var pad in pads) pad.SlideToSlot(pad.HomeSlot, seconds);
         }
 
         void OnPointerPress(InputAction.CallbackContext context)
@@ -73,10 +89,16 @@ namespace SimonDuel.Game
             }
         }
 
-        void OnKeyPress(Pad pad, InputAction.CallbackContext context)
+        // Keys follow places on the board, so Shift matters on a keyboard too.
+        void OnKeyPress(int slot, InputAction.CallbackContext context)
         {
             if (runner.PressAnywhere()) return;
-            Press(pad, "key", context.time);
+            foreach (var pad in pads)
+            {
+                if (pad.Slot != slot) continue;
+                Press(pad, "key", context.time);
+                return;
+            }
         }
 
         void Press(Pad pad, string source, double inputTime)

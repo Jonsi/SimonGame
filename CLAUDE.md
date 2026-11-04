@@ -24,7 +24,7 @@ Memory duel built in Unity under CuzGames: widescreen in a computer browser firs
 
 ## Rules while working
 
-- Build in the plan's order, one step the owner can try at a time. Never commit unless the owner asks; after each step say what is built and that it is not committed.
+- Build in the plan's order, one step the owner can try at a time. Owner, 4 Nov 2026: keep going without waiting; commit and upload each finished step to the working branch, never to main. Stop only when stuck or a task needs the owner's hands, accounts or money.
 - Rules code stays plain C# with no Unity references, so the online checker can share it.
 - Every tunable number lives in a settings asset, never inline.
 - Log lines are tagged `[Duel]`, `[Touch]`, `[Audio]`, `[Online]`.

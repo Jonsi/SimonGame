@@ -111,8 +111,10 @@ On screen:
 
 You can try at the end: the same game, with speeds and timers set from how people actually played.
 
-- [ ] **4.01** The game saves a short summary of every match: lengths reached, time per tap, timeouts, match length.
-- [ ] **4.02** A way to save that file to your computer (a download button).
+Owner, 4 Nov 2026: skip 4.03–4.09 for now and do them with the matches from the Checkpoint, when Twists are in.
+
+- [x] **4.01** The game saves a short summary of every match: lengths reached, time per tap, timeouts, match length. Done 4 Nov 2026: kept in the browser, turn by turn, up to 200 matches.
+- [x] **4.02** A way to save that file to your computer (a download button). Done 4 Nov 2026: "Download match notes" on the winner screen.
 - [ ] **4.03** **You:** play at least 5 matches with different people.
 - [ ] **4.04** Read the summaries: typical match length, where slips happen, how often the timer runs out.
 - [ ] **4.05** Set the playback speeds from the data.
@@ -125,20 +127,20 @@ You can try at the end: the same game, with speeds and timers set from how peopl
 
 You can try at the end: Reverse, Shift and Echo in real matches, each explained the first time it appears.
 
-- [ ] **5.01** Charge: one pip per successful turn, a Twist at three; none in a rally's first two turns.
-- [ ] **5.02** Hold at most one Twist; Twists never stack.
-- [ ] **5.03** A shuffled bag of Twists, so the same one rarely repeats.
-- [ ] **5.04** Arming: one tap to use it after Add One; skipping keeps it. A setting can make it automatic instead.
-- [ ] **5.05** Reverse rule: enter the pattern back to front.
-- [ ] **5.06** Reverse on screen: "REVERSE" banner, ring runs the other way.
-- [ ] **5.07** Shift rule: after watching, every pad moves one slot clockwise; you tap by pad, not by place.
-- [ ] **5.08** Shift on screen: pads slide to their new slots, then slide home during the hand-over.
-- [ ] **5.09** Shift with less motion: a fade plus numbered slots.
-- [ ] **5.10** Echo rule: one marked step must be tapped twice.
-- [ ] **5.11** Echo on screen: the doubled step pulses twice.
-- [ ] **5.12** Charge pips, Twist slot and arm button on screen (plain).
-- [ ] **5.13** First-time explainer: one sentence plus a short demo per Twist; a short banner after that.
-- [ ] **5.14** Twist log lines, and Editor keys to force any Twist.
+- [x] **5.01** Charge: one pip per successful turn, a Twist at three; none in a rally's first two turns. Done 4 Nov 2026.
+- [x] **5.02** Hold at most one Twist; Twists never stack. Done 4 Nov 2026.
+- [x] **5.03** A shuffled bag of Twists, so the same one rarely repeats. Done 4 Nov 2026.
+- [x] **5.04** Arming: one tap to use it after Add One; skipping keeps it. A setting can make it automatic instead. Done 4 Nov 2026: 4 seconds to choose, then it is kept.
+- [x] **5.05** Reverse rule: enter the pattern back to front. Done 4 Nov 2026.
+- [x] **5.06** Reverse on screen: "REVERSE" banner, ring runs the other way. Done 4 Nov 2026.
+- [x] **5.07** Shift rule: after watching, every pad moves one slot clockwise; you tap by pad, not by place. Done 4 Nov 2026.
+- [x] **5.08** Shift on screen: pads slide to their new slots, then slide home during the hand-over. Done 4 Nov 2026.
+- [ ] **5.09** Shift with less motion: a fade plus numbered slots. Waits for the less-motion setting in step 8.
+- [x] **5.10** Echo rule: one marked step must be tapped twice. Done 4 Nov 2026.
+- [x] **5.11** Echo on screen: the doubled step pulses twice. Done 4 Nov 2026.
+- [x] **5.12** Charge pips, Twist slot and arm button on screen (plain). Done 4 Nov 2026.
+- [x] **5.13** First-time explainer: one sentence plus a short demo per Twist; a short banner after that. Done 4 Nov 2026: shown once per browser.
+- [x] **5.14** Twist log lines, and Editor keys to force any Twist. Done 4 Nov 2026: R, S and E hand over a Twist, in test builds only.
 - [ ] **5.15** **You:** play with Twists. Can people explain the rule before they tap? Notes go in the journal.
 
 ## Step 6 — Computer opponent and Practice

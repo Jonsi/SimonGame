@@ -157,8 +157,8 @@ namespace SimonDuel.EditorTools
             var banner = BuildBanner(canvasGo.transform, font, out var bannerText);
             var panels = new[]
             {
-                BuildPlayerPanel(canvasGo.transform, font, -699, "1", "PLAYER 1", rules.rules.ralliesToWin),
-                BuildPlayerPanel(canvasGo.transform, font, 699, "2", "PLAYER 2", rules.rules.ralliesToWin),
+                BuildPlayerPanel(canvasGo.transform, font, -699, "1", "PLAYER 1", rules.rules),
+                BuildPlayerPanel(canvasGo.transform, font, 699, "2", "PLAYER 2", rules.rules),
             };
             var length = MakeText(canvasGo.transform, "Length", "LENGTH 2", font, 30, TextMuted);
             Place(length.rectTransform, 0, -498, 400, 50);
@@ -172,7 +172,7 @@ namespace SimonDuel.EditorTools
             Stretch(pausedText.rectTransform, Vector2.zero, Vector2.one);
             paused.SetActive(false);
 
-            var result = BuildCover(canvasGo.transform, "MatchResult", 0.96f);
+            var result = BuildCover(canvasGo.transform, "MatchResult", 1f);
             var resultTitle = MakeText(result.transform, "Title", "PLAYER 1 WINS", font, 110, Color.white);
             Place(resultTitle.rectTransform, 0, 210, 1400, 150);
             var resultScore = MakeText(result.transform, "Score", "2 - 1", font, 90, TextSecondary);
@@ -181,6 +181,9 @@ namespace SimonDuel.EditorTools
             Place((RectTransform)rematch.transform, 0, -90, 460, 110);
             var home = MakeButton(result.transform, "Home", "Home", font, 30, Raised, TextSecondary);
             Place((RectTransform)home.transform, 0, -220, 220, 72);
+            var notes = MakeButton(result.transform, "Notes", "Download match notes", font, 26, Panel, TextMuted);
+            Place((RectTransform)notes.transform, 0, -320, 440, 64);
+            var notesLabel = notes.GetComponentInChildren<Text>();
             result.SetActive(false);
 
             var cover = BuildCover(canvasGo.transform, "TapToStart", 0.9f);
@@ -199,7 +202,7 @@ namespace SimonDuel.EditorTools
             var duelScreen = canvasGo.AddComponent<DuelScreen>();
             Wire(duelScreen, ("feel", feel), ("banner", bannerText), ("bannerLine", banner), ("length", length), ("timerRing", timerRing),
                 ("pausedCover", paused), ("resultCover", result), ("resultTitle", resultTitle), ("resultScore", resultScore),
-                ("rematch", rematch), ("home", home));
+                ("rematch", rematch), ("home", home), ("notes", notes), ("notesLabel", notesLabel));
             WireList(duelScreen, "players", panels);
 
             var runner = canvasGo.AddComponent<DuelRunner>();
@@ -341,7 +344,7 @@ namespace SimonDuel.EditorTools
         static Image BuildBanner(Transform canvas, Font font, out Text text)
         {
             var line = MakeSliced(canvas, "Banner", "pill.png", 41, Player1);
-            Place(line.rectTransform, 0, 456, 570, 84);
+            Place(line.rectTransform, 0, 456, 980, 84);
             var fill = MakeSliced(line.transform, "Fill", "pill.png", 41, Raised);
             fill.rectTransform.offsetMin = Vector2.one * 3;
             fill.rectTransform.offsetMax = Vector2.one * -3;
@@ -350,7 +353,7 @@ namespace SimonDuel.EditorTools
             return line;
         }
 
-        static PlayerPanel BuildPlayerPanel(Transform canvas, Font font, float x, string number, string label, int ralliesToWin)
+        static PlayerPanel BuildPlayerPanel(Transform canvas, Font font, float x, string number, string label, RulesConfig rules)
         {
             var color = number == "1" ? Player1 : Player2;
             var panel = MakeSliced(canvas, label, "panel.png", 40, Panel);
@@ -367,7 +370,7 @@ namespace SimonDuel.EditorTools
             Stretch(MakeText(badge.transform, "Number", number, font, 54, color).rectTransform, Vector2.zero, Vector2.one);
 
             Place(MakeText(panel.transform, "Name", label, font, 34, color).rectTransform, 0, 120, 360, 50);
-            var pips = new Image[ralliesToWin];
+            var pips = new Image[rules.ralliesToWin];
             for (int i = 0; i < pips.Length; i++)
             {
                 pips[i] = MakeImage(panel.transform, "Pip", LoadSprite("disc.png"));
@@ -380,23 +383,33 @@ namespace SimonDuel.EditorTools
             Stretch(MakeText(turn.transform, "Text", "YOUR TURN", font, 28, Cavity).rectTransform, Vector2.zero, Vector2.one);
             turn.gameObject.SetActive(false);
 
-            // Twists arrive in step 5; dimmed until then.
-            var twists = new GameObject("Twists", typeof(RectTransform), typeof(CanvasGroup));
-            twists.transform.SetParent(panel.transform, false);
-            Stretch((RectTransform)twists.transform, Vector2.zero, Vector2.one);
-            twists.GetComponent<CanvasGroup>().alpha = 0.35f;
-
-            for (int i = 0; i < 2; i++)
+            var charge = new Image[rules.chargeToEarnTwist];
+            for (int i = 0; i < charge.Length; i++)
             {
-                var card = MakeSliced(twists.transform, "Twist", "panel.png", 40, Cavity);
-                Place(card.rectTransform, i == 0 ? -87 : 87, -220, 160, 180);
-                Stretch(MakeSliced(card.transform, "Line", "panel_line.png", 40, Twist).rectTransform, Vector2.zero, Vector2.one);
-                Stretch(MakeText(card.transform, "Text", i == 0 ? "REVERSE" : "SHIFT", font, 24, TwistText).rectTransform, Vector2.zero, Vector2.one);
+                charge[i] = MakeImage(panel.transform, "Charge", LoadSprite("disc.png"));
+                charge[i].color = Line;
+                Place(charge[i].rectTransform, (i - (charge.Length - 1) / 2f) * 30, -60, 18, 18);
             }
 
+            var card = MakeSliced(panel.transform, "TwistCard", "panel.png", 40, Cavity);
+            card.raycastTarget = true;
+            Place(card.rectTransform, 0, -160, 320, 120);
+            var cardButton = card.gameObject.AddComponent<Button>();
+            cardButton.interactable = false;
+            var cardLine = MakeSliced(card.transform, "Line", "panel_line.png", 40, Twist);
+            Stretch(cardLine.rectTransform, Vector2.zero, Vector2.one);
+            var cardText = MakeText(card.transform, "Text", "NO TWIST", font, 28, TwistText);
+            cardText.raycastTarget = false;
+            Stretch(cardText.rectTransform, Vector2.zero, Vector2.one);
+
+            var keep = MakeButton(panel.transform, "Keep", "KEEP IT", font, 24, Raised, TextSecondary);
+            Place((RectTransform)keep.transform, 0, -280, 200, 56);
+            keep.gameObject.SetActive(false);
+
             var player = panel.gameObject.AddComponent<PlayerPanel>();
-            Wire(player, ("outline", line), ("yourTurn", turn.gameObject));
+            Wire(player, ("outline", line), ("yourTurn", turn.gameObject), ("twistCard", cardButton), ("twistLabel", cardText), ("keep", keep));
             WireList(player, "pips", pips);
+            WireList(player, "chargePips", charge);
             return player;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SimonDuel.Rules
 {
@@ -19,5 +20,11 @@ namespace SimonDuel.Rules
         public int playbackGapMs = 140;
         public int playbackGapFloorMs = 100;
         public int playbackGapDropPerStepMs = 4;
+
+        public int chargeToEarnTwist = 3;
+        public int turnsBeforeTwists = 2;
+        public bool chargeResetsEachRally = true;
+        public bool twistsArmThemselves = false;
+        public List<TwistId> twistBag = new List<TwistId> { TwistId.Reverse, TwistId.Shift, TwistId.Echo };
     }
 }

@@ -17,8 +17,9 @@ namespace SimonDuel.Tests
         static void PlayGoodTurn(Referee referee, PadId added = PadId.Star)
         {
             var plan = referee.StartTurn();
-            foreach (var step in plan.Pattern) referee.Tap(step, 100);
+            foreach (var step in plan.Entry) referee.Tap(step, 100);
             referee.AddStep(added);
+            if (referee.Phase == MatchPhase.ArmChoice) referee.ArmTwist(false);
         }
 
         static void Slip(Referee referee)

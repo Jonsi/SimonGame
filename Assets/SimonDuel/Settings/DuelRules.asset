@@ -24,3 +24,8 @@ MonoBehaviour:
     playbackGapMs: 140
     playbackGapFloorMs: 100
     playbackGapDropPerStepMs: 4
+    chargeToEarnTwist: 3
+    turnsBeforeTwists: 2
+    chargeResetsEachRally: 1
+    twistsArmThemselves: 0
+    twistBag: 010000000200000003000000

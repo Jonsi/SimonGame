@@ -25,8 +25,14 @@ namespace SimonDuel.Game
         float depthChange;
         float shakePixels;
         Color rimColor = Color.white;
+        int slot;
+        Vector2 slideFrom;
+        float slideStart;
+        float slideSeconds;
 
         public PadId Id => id;
+        public int Slot => slot;
+        public int HomeSlot => (int)id;
 
         public void Setup(Feel settings)
         {
@@ -34,21 +40,12 @@ namespace SimonDuel.Game
             look = feel.looks[(int)id];
 
             // Home slots, left to right and top to bottom: Circle, Triangle, Square, Star.
-            int slot = (int)id;
-            float signX = slot % 2 == 0 ? -1f : 1f;
-            float signY = slot < 2 ? 1f : -1f;
-            center = new Vector2(signX * (feel.padSize.x + feel.padGap) / 2f, signY * (feel.padSize.y + feel.padGap) / 2f);
-
+            PlaceInSlot(HomeSlot);
             var rect = (RectTransform)transform;
             rect.anchoredPosition = center;
             rect.sizeDelta = feel.padSize;
-            // The shape is drawn for the top-left slot; mirroring puts its tight corner toward the board's center.
-            var mirror = new Vector3(signX < 0 ? 1f : -1f, signY > 0 ? 1f : -1f, 1f);
-            shape.rectTransform.localScale = mirror;
-            depth.rectTransform.localScale = mirror;
             depth.rectTransform.anchoredPosition = new Vector2(0f, -feel.restingDepth);
             depth.color = look.depth;
-            rim.rectTransform.localScale = mirror;
             rim.rectTransform.offsetMin = Vector2.one * -feel.rimOutset;
             rim.rectTransform.offsetMax = Vector2.one * feel.rimOutset;
             gloss.rectTransform.anchoredPosition = new Vector2(0f, -feel.glossInset);
@@ -58,6 +55,29 @@ namespace SimonDuel.Game
             lightSeconds = feel.lightSettleSeconds;
             peakScale = feel.pressedScale;
             Show(float.PositiveInfinity);
+        }
+
+        // Moves to another slot along an arc. The pad keeps its identity; only its place changes.
+        public void SlideToSlot(int newSlot, float seconds)
+        {
+            slideFrom = ((RectTransform)transform).anchoredPosition;
+            slideStart = Time.time;
+            slideSeconds = seconds;
+            PlaceInSlot(newSlot);
+        }
+
+        void PlaceInSlot(int newSlot)
+        {
+            slot = newSlot;
+            float signX = slot % 2 == 0 ? -1f : 1f;
+            float signY = slot < 2 ? 1f : -1f;
+            center = new Vector2(signX * (feel.padSize.x + feel.padGap) / 2f, signY * (feel.padSize.y + feel.padGap) / 2f);
+
+            // The shape is drawn for the top-left slot; mirroring puts its tight corner toward the board's center.
+            var mirror = new Vector3(signX < 0 ? 1f : -1f, signY > 0 ? 1f : -1f, 1f);
+            shape.rectTransform.localScale = mirror;
+            depth.rectTransform.localScale = mirror;
+            rim.rectTransform.localScale = mirror;
         }
 
         public bool Contains(Vector2 boardPoint)
@@ -75,7 +95,12 @@ namespace SimonDuel.Game
         // One step of the pattern, or the step that should have been pressed.
         public void Play(float seconds)
         {
-            Light(seconds, feel.playbackScale, 0f, 0f, Color.white);
+            Play(seconds, Color.white);
+        }
+
+        public void Play(float seconds, Color rimTint)
+        {
+            Light(seconds, feel.playbackScale, 0f, 0f, rimTint);
         }
 
         // A press on the wrong pad.
@@ -100,6 +125,18 @@ namespace SimonDuel.Game
         void Update()
         {
             Show(Time.unscaledTime - pressedAt);
+            Slide();
+        }
+
+        void Slide()
+        {
+            var rect = (RectTransform)transform;
+            if (rect.anchoredPosition == center) return;
+
+            float progress = Mathf.SmoothStep(0f, 1f, (Time.time - slideStart) / slideSeconds);
+            float angle = Mathf.LerpAngle(Mathf.Atan2(slideFrom.y, slideFrom.x) * Mathf.Rad2Deg, Mathf.Atan2(center.y, center.x) * Mathf.Rad2Deg, progress) * Mathf.Deg2Rad;
+            float radius = Mathf.Lerp(slideFrom.magnitude, center.magnitude, progress);
+            rect.anchoredPosition = progress >= 1f ? center : new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
         }
 
         void Show(float sincePress)

@@ -1,4 +1,5 @@
 using System;
+using SimonDuel.Rules;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,19 +20,30 @@ namespace SimonDuel.Game
         [SerializeField] Text resultScore;
         [SerializeField] Button rematch;
         [SerializeField] Button home;
+        [SerializeField] Button notes;
+        [SerializeField] Text notesLabel;
 
         static readonly Color Idle = new Color32(0x2A, 0x52, 0x7D, 0xFF);
 
-        public void Listen(Action onRematch, Action onHome)
+        public void Listen(Action onRematch, Action onHome, Action onNotes)
         {
+            notes.onClick.AddListener(() => onNotes());
             rematch.onClick.AddListener(() => onRematch());
             home.onClick.AddListener(() => onHome());
         }
 
-        public void ShowPlayers(int activePlayer, int score0, int score1)
+        public void ListenToTwists(Action onUse, Action onKeep)
         {
-            players[0].Show(score0, activePlayer == 0, feel.playerColors[0], Idle);
-            players[1].Show(score1, activePlayer == 1, feel.playerColors[1], Idle);
+            foreach (var player in players) player.Listen(onUse, onKeep);
+        }
+
+        public void ShowPlayers(int activePlayer, Referee referee, int offeredTo = -1)
+        {
+            for (int i = 0; i < players.Length; i++)
+            {
+                players[i].Show(referee.Score(i), activePlayer == i, feel.playerColors[i], Idle);
+                players[i].ShowTwist(referee.Charge(i), referee.HeldTwist(i), feel.twistColor, Idle, offeredTo == i);
+            }
             var color = activePlayer >= 0 ? feel.playerColors[activePlayer] : Idle;
             bannerLine.color = color;
             timerRing.color = color;
@@ -47,6 +59,11 @@ namespace SimonDuel.Game
             length.text = $"LENGTH {steps}";
         }
 
+        public void ShowTimerDirection(bool backwards)
+        {
+            timerRing.fillClockwise = !backwards;
+        }
+
         public void ShowTimer(float fractionLeft)
         {
             timerRing.fillAmount = fractionLeft;
@@ -57,8 +74,9 @@ namespace SimonDuel.Game
             pausedCover.SetActive(paused);
         }
 
-        public void ShowResult(int winner, int score0, int score1)
+        public void ShowResult(int winner, int score0, int score1, int notesSaved)
         {
+            notesLabel.text = $"Download match notes ({notesSaved})";
             resultCover.SetActive(true);
             resultTitle.text = $"PLAYER {winner + 1} WINS";
             resultTitle.color = feel.playerColors[winner];
