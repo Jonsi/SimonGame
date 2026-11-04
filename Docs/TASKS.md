@@ -147,16 +147,16 @@ You can try at the end: Reverse, Shift and Echo in real matches, each explained 
 
 You can try at the end: single player. Beat Easy, lose to Hard, and practise alone.
 
-- [ ] **6.01** The computer's memory: slips become likely past its comfortable length (Easy 5, Medium 8, Hard 12), mostly in the middle of the pattern, more under Twists.
-- [ ] **6.02** The computer's timing: human-like gaps between taps, slower near its limit.
-- [ ] **6.03** The computer's Add One: random on Easy, tricky runs on Hard.
-- [ ] **6.04** The computer's Twists: used at once on Easy, saved for long patterns on Hard.
-- [ ] **6.05** "Computer levels" settings file: every number per level.
-- [ ] **6.06** The computer plays on the board while you watch, always labelled "COMPUTER".
-- [ ] **6.07** Pick Easy, Medium or Hard before the match.
-- [ ] **6.08** Practice: Classic (the game adds steps) and Endless (how long can you go).
-- [ ] **6.09** Practice: Twist practice, sight-only and sound-only.
-- [ ] **6.10** Automatic test: 1,000 computer-vs-computer matches per level; the levels must differ clearly.
+- [x] **6.01** The computer's memory: slips become likely past its comfortable length (Easy 5, Medium 8, Hard 12), mostly in the middle of the pattern, more under Twists. Done 4 Nov 2026.
+- [x] **6.02** The computer's timing: human-like gaps between taps, slower near its limit. Done 4 Nov 2026.
+- [x] **6.03** The computer's Add One: random on Easy, tricky runs on Hard. Done 4 Nov 2026.
+- [x] **6.04** The computer's Twists: used at once on Easy, saved for long patterns on Hard. Done 4 Nov 2026.
+- [x] **6.05** "Computer levels" settings file: every number per level. Done 4 Nov 2026.
+- [x] **6.06** The computer plays on the board while you watch, always labelled "COMPUTER". Done 4 Nov 2026.
+- [x] **6.07** Pick Easy, Medium or Hard before the match. Done 4 Nov 2026: a plain menu after "Tap to start".
+- [x] **6.08** Practice: Classic (the game adds steps) and Endless (how long can you go). Done 4 Nov 2026.
+- [x] **6.09** Practice: Twist practice, sight-only and sound-only. Done 4 Nov 2026.
+- [x] **6.10** Automatic test: 1,000 computer-vs-computer matches per level; the levels must differ clearly. Done 4 Nov 2026: Hard wins over 85% against Easy; the 55 tests pass.
 - [ ] **6.11** **You:** beat Easy, lose to Hard. Notes go in the journal.
 
 ## Phone browser — after step 6, before the Checkpoint

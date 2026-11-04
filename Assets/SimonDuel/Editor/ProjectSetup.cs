@@ -26,6 +26,7 @@ namespace SimonDuel.EditorTools
         const string FeelPath = "Assets/SimonDuel/Settings/Feel.asset";
         const string DuelRulesPath = "Assets/SimonDuel/Settings/DuelRules.asset";
         const string TimingPath = "Assets/SimonDuel/Settings/Timing.asset";
+        const string ComputerLevelsPath = "Assets/SimonDuel/Settings/ComputerLevels.asset";
         const string StandInArt = "Assets/SimonDuel/Art/StandIn/";
         const string StandInAudio = "Assets/SimonDuel/Audio/StandIn/";
 
@@ -152,6 +153,7 @@ namespace SimonDuel.EditorTools
             var feel = LoadSettings<Feel>(FeelPath);
             var rules = LoadSettings<DuelRules>(DuelRulesPath);
             var timing = LoadSettings<Timing>(TimingPath);
+            var levels = LoadSettings<ComputerLevels>(ComputerLevelsPath);
 
             var board = BuildBoard(canvasGo.transform, feel, out var timerRing);
             var banner = BuildBanner(canvasGo.transform, font, out var bannerText);
@@ -186,6 +188,9 @@ namespace SimonDuel.EditorTools
             var notesLabel = notes.GetComponentInChildren<Text>();
             result.SetActive(false);
 
+            var menu = BuildMenu(canvasGo.transform, font, levels, out var menuButtons);
+            menu.SetActive(false);
+
             var cover = BuildCover(canvasGo.transform, "TapToStart", 0.9f);
             var title = MakeText(cover.transform, "Title", "<color=#FF9418>SIMON</color> <color=#20D7ED>DUEL</color>", font, 170, Color.white);
             title.raycastTarget = false;
@@ -202,11 +207,13 @@ namespace SimonDuel.EditorTools
             var duelScreen = canvasGo.AddComponent<DuelScreen>();
             Wire(duelScreen, ("feel", feel), ("banner", bannerText), ("bannerLine", banner), ("length", length), ("timerRing", timerRing),
                 ("pausedCover", paused), ("resultCover", result), ("resultTitle", resultTitle), ("resultScore", resultScore),
-                ("rematch", rematch), ("home", home), ("notes", notes), ("notesLabel", notesLabel));
+                ("rematch", rematch), ("home", home), ("notes", notes), ("notesLabel", notesLabel),
+                ("rematchLabel", rematch.GetComponentInChildren<Text>()), ("menu", menu));
             WireList(duelScreen, "players", panels);
+            WireList(duelScreen, "menuButtons", menuButtons);
 
             var runner = canvasGo.AddComponent<DuelRunner>();
-            Wire(runner, ("rules", rules), ("timing", timing), ("board", board), ("screen", duelScreen), ("boot", boot));
+            Wire(runner, ("rules", rules), ("computerLevels", levels), ("timing", timing), ("board", board), ("screen", duelScreen), ("boot", boot));
             Wire(board, ("runner", runner));
 
             System.IO.Directory.CreateDirectory("Assets/SimonDuel/Scenes");
@@ -248,6 +255,61 @@ namespace SimonDuel.EditorTools
             for (int i = 0; i < values.Length; i++)
                 list.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static GameObject BuildMenu(Transform canvas, Font font, ComputerLevels levels, out MenuButton[] buttons)
+        {
+            var menu = BuildCover(canvas, "Menu", 1f);
+            var list = new System.Collections.Generic.List<MenuButton>();
+
+            var title = MakeText(menu.transform, "Title", "<color=#FF9418>SIMON</color> <color=#20D7ED>DUEL</color>", font, 120, Color.white);
+            title.raycastTarget = false;
+            Place(title.rectTransform, 0, 400, 1400, 170);
+
+            list.Add(MakeMenuButton(menu.transform, "TWO PLAYERS", font, 40, Player1, Cavity, 0, 225, 640, 104, new PlaySetup { mode = GameMode.TwoPlayers }));
+
+            MakeMenuHeading(menu.transform, "AGAINST THE COMPUTER", font, 90);
+            for (int i = 0; i < levels.levels.Length; i++)
+                list.Add(MakeMenuButton(menu.transform, levels.levels[i].label, font, 34, Player2, Cavity, (i - 1) * 300, 0, 280, 92,
+                    new PlaySetup { mode = GameMode.Computer, computerLevel = i }));
+
+            MakeMenuHeading(menu.transform, "PRACTICE", font, -125);
+            var kinds = new[]
+            {
+                (PracticeKind.Classic, "CLASSIC"), (PracticeKind.Endless, "ENDLESS"), (PracticeKind.Twists, "TWISTS"),
+                (PracticeKind.SightOnly, "SIGHT ONLY"), (PracticeKind.SoundOnly, "SOUND ONLY"),
+            };
+            for (int i = 0; i < kinds.Length; i++)
+            {
+                bool topRow = i < 3;
+                float x = topRow ? (i - 1) * 300 : (i - 3.5f) * 300;
+                list.Add(MakeMenuButton(menu.transform, kinds[i].Item2, font, 28, Raised, Color.white, x, topRow ? -215 : -320, 280, 84,
+                    new PlaySetup { mode = GameMode.Practice, practice = kinds[i].Item1 }));
+            }
+
+            buttons = list.ToArray();
+            return menu;
+        }
+
+        static void MakeMenuHeading(Transform parent, string label, Font font, float y)
+        {
+            var heading = MakeText(parent, label, label, font, 28, TextMuted);
+            heading.raycastTarget = false;
+            Place(heading.rectTransform, 0, y, 900, 44);
+        }
+
+        static MenuButton MakeMenuButton(Transform parent, string label, Font font, int size, Color color, Color textColor,
+            float x, float y, float width, float height, PlaySetup setup)
+        {
+            var button = MakeButton(parent, label, label, font, size, color, textColor);
+            Place((RectTransform)button.transform, x, y, width, height);
+            var choice = button.gameObject.AddComponent<MenuButton>();
+            var so = new SerializedObject(choice);
+            so.FindProperty("setup.mode").enumValueIndex = (int)setup.mode;
+            so.FindProperty("setup.computerLevel").intValue = setup.computerLevel;
+            so.FindProperty("setup.practice").enumValueIndex = (int)setup.practice;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return choice;
         }
 
         static GameObject BuildCover(Transform canvas, string name, float opacity)
@@ -367,9 +429,11 @@ namespace SimonDuel.EditorTools
             var inner = MakeImage(badge.transform, "Inner", LoadSprite("disc.png"));
             inner.color = Cavity;
             Place(inner.rectTransform, 0, 0, 108, 108);
-            Stretch(MakeText(badge.transform, "Number", number, font, 54, color).rectTransform, Vector2.zero, Vector2.one);
+            var numberText = MakeText(badge.transform, "Number", number, font, 54, color);
+            Stretch(numberText.rectTransform, Vector2.zero, Vector2.one);
 
-            Place(MakeText(panel.transform, "Name", label, font, 34, color).rectTransform, 0, 120, 360, 50);
+            var nameText = MakeText(panel.transform, "Name", label, font, 34, color);
+            Place(nameText.rectTransform, 0, 120, 360, 50);
             var pips = new Image[rules.ralliesToWin];
             for (int i = 0; i < pips.Length; i++)
             {
@@ -407,7 +471,7 @@ namespace SimonDuel.EditorTools
             keep.gameObject.SetActive(false);
 
             var player = panel.gameObject.AddComponent<PlayerPanel>();
-            Wire(player, ("outline", line), ("yourTurn", turn.gameObject), ("twistCard", cardButton), ("twistLabel", cardText), ("keep", keep));
+            Wire(player, ("outline", line), ("yourTurn", turn.gameObject), ("twistCard", cardButton), ("twistLabel", cardText), ("keep", keep), ("nameLabel", nameText), ("numberLabel", numberText));
             WireList(player, "pips", pips);
             WireList(player, "chargePips", charge);
             return player;

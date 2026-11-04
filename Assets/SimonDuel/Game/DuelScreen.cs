@@ -22,6 +22,9 @@ namespace SimonDuel.Game
         [SerializeField] Button home;
         [SerializeField] Button notes;
         [SerializeField] Text notesLabel;
+        [SerializeField] Text rematchLabel;
+        [SerializeField] GameObject menu;
+        [SerializeField] MenuButton[] menuButtons;
 
         static readonly Color Idle = new Color32(0x2A, 0x52, 0x7D, 0xFF);
 
@@ -30,6 +33,27 @@ namespace SimonDuel.Game
             notes.onClick.AddListener(() => onNotes());
             rematch.onClick.AddListener(() => onRematch());
             home.onClick.AddListener(() => onHome());
+        }
+
+        public void ListenToMenu(Action<PlaySetup> onChoose)
+        {
+            foreach (var button in menuButtons)
+            {
+                var choice = button;
+                button.Button.onClick.AddListener(() => onChoose(choice.Setup));
+            }
+        }
+
+        public void ShowMenu(bool show)
+        {
+            menu.SetActive(show);
+        }
+
+        public void ShowNames(string[] names, string secondNumber, bool showSecondPlayer)
+        {
+            players[0].ShowName(names[0], "1");
+            players[1].ShowName(names[1], secondNumber);
+            players[1].gameObject.SetActive(showSecondPlayer);
         }
 
         public void ListenToTwists(Action onUse, Action onKeep)
@@ -74,13 +98,15 @@ namespace SimonDuel.Game
             pausedCover.SetActive(paused);
         }
 
-        public void ShowResult(int winner, int score0, int score1, int notesSaved)
+        public void ShowResult(string title, int colorPlayer, string score, string againLabel, int notesSaved)
         {
-            notesLabel.text = $"Download match notes ({notesSaved})";
             resultCover.SetActive(true);
-            resultTitle.text = $"PLAYER {winner + 1} WINS";
-            resultTitle.color = feel.playerColors[winner];
-            resultScore.text = $"{score0} - {score1}";
+            resultTitle.text = title;
+            resultTitle.color = feel.playerColors[colorPlayer];
+            resultScore.text = score;
+            rematchLabel.text = againLabel;
+            notes.gameObject.SetActive(notesSaved > 0);
+            notesLabel.text = $"Download match notes ({notesSaved})";
         }
 
         public void HideResult()

@@ -33,7 +33,7 @@ namespace SimonDuel.Rules
         public int TimeAllowedMs;
     }
 
-    public enum MoveKind { Tap, TimeOut, AddStep, ArmTwist, GiveTwist }
+    public enum MoveKind { Tap, TimeOut, AddStep, AddRandomStep, ArmTwist, GiveTwist }
 
     public readonly struct Move
     {
@@ -90,6 +90,7 @@ namespace SimonDuel.Rules
         public int FirstStarter { get; }
         public int LastRallyWinner { get; private set; } = -1;
         public MatchRecord Record { get; }
+        public RulesConfig Rules => rules;
         public IReadOnlyList<PadId> Pattern => pattern;
         public PadId Expected => entry[nextStep];
         public TwistId IncomingTwist { get; private set; }  // armed for the next turn
@@ -143,7 +144,7 @@ namespace SimonDuel.Rules
                 EchoStep = echoStep,
                 LightMs = Math.Max(rules.playbackLightFloorMs, rules.playbackLightMs - extraSteps * rules.playbackLightDropPerStepMs),
                 GapMs = Math.Max(rules.playbackGapFloorMs, rules.playbackGapMs - extraSteps * rules.playbackGapDropPerStepMs),
-                TimeAllowedMs = Math.Min(rules.timerMaxMs, rules.timerBaseMs + entry.Count * rules.timerPerStepMs),
+                TimeAllowedMs = rules.noTimer ? 0 : Math.Min(rules.timerMaxMs, rules.timerBaseMs + entry.Count * rules.timerPerStepMs),
             };
         }
 
@@ -177,8 +178,28 @@ namespace SimonDuel.Rules
         {
             Require(MatchPhase.AddOne);
             Record.Moves.Add(new Move(MoveKind.AddStep, pad, 0));
+            Extend(pad);
+        }
+
+        // Practice: the game picks the next step.
+        public void AddRandomStep()
+        {
+            Require(MatchPhase.AddOne);
+            Record.Moves.Add(new Move(MoveKind.AddRandomStep, default, 0));
+            Extend(Pads.All[random.Next(Pads.All.Length)]);
+        }
+
+        void Extend(PadId pad)
+        {
             pattern.Add(pad);
             turnsDoneThisRally++;
+            if (rules.practiceAlone)
+            {
+                if (rules.twistEveryTurn) IncomingTwist = DrawTwist();
+                HandOver();
+                return;
+            }
+
             bool twistsAllowed = turnsDoneThisRally > rules.turnsBeforeTwists;
 
             if (twistsAllowed && held[ActivePlayer] == TwistId.None)
@@ -242,6 +263,7 @@ namespace SimonDuel.Rules
                     case MoveKind.Tap: referee.Tap(move.Pad, move.Ms); break;
                     case MoveKind.TimeOut: referee.TimeOut(); break;
                     case MoveKind.AddStep: referee.AddStep(move.Pad); break;
+                    case MoveKind.AddRandomStep: referee.AddRandomStep(); break;
                     case MoveKind.ArmTwist: referee.ArmTwist(move.Armed); break;
                     case MoveKind.GiveTwist: referee.GiveTwist(move.Twist); break;
                 }
@@ -274,7 +296,7 @@ namespace SimonDuel.Rules
 
         void HandOver()
         {
-            ActivePlayer = Other(ActivePlayer);
+            if (!rules.practiceAlone) ActivePlayer = Other(ActivePlayer);
             Phase = MatchPhase.TurnReady;
         }
 
@@ -299,6 +321,12 @@ namespace SimonDuel.Rules
 
         void EndRally()
         {
+            if (rules.practiceAlone)
+            {
+                Phase = MatchPhase.MatchOver;
+                return;
+            }
+
             LastRallyWinner = Other(ActivePlayer);
             score[LastRallyWinner]++;
             Phase = score[LastRallyWinner] >= rules.ralliesToWin ? MatchPhase.MatchOver : MatchPhase.RallyOver;

@@ -57,6 +57,11 @@ namespace SimonDuel.Game
 
         public Color TwistColor => feel.twistColor;
 
+        public void SetSilent(bool silent)
+        {
+            foreach (var pad in pads) pad.Silent = silent;
+        }
+
         public Pad Find(PadId id)
         {
             foreach (var pad in pads)

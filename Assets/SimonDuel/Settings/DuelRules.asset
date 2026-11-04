@@ -29,3 +29,6 @@ MonoBehaviour:
     chargeResetsEachRally: 1
     twistsArmThemselves: 0
     twistBag: 010000000200000003000000
+    practiceAlone: 0
+    noTimer: 0
+    twistEveryTurn: 0

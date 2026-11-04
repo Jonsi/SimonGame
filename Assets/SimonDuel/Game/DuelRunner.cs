@@ -2,37 +2,44 @@ using System;
 using System.Collections;
 using SimonDuel.Rules;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using UnityEngine.InputSystem;
 #endif
 
 namespace SimonDuel.Game
 {
-    // Plays one match on screen: asks the referee what happens, and shows it in order.
-    // Turn order: whose turn, click when ready, watch, short pause, repeat, add one, hand over.
+    // Plays one match or practice run on screen: asks the referee what happens, and shows it in order.
+    // A human turn: whose turn, click when ready, watch, short pause, repeat, add one, hand over.
     public class DuelRunner : MonoBehaviour
     {
         [SerializeField] DuelRules rules;
+        [SerializeField] ComputerLevels computerLevels;
         [SerializeField] Timing timing;
         [SerializeField] PadBoard board;
         [SerializeField] DuelScreen screen;
         [SerializeField] Boot boot;
 
         const int NoActivePlayer = -1;
+        const int ComputerSeat = 1;
 
-        enum Stage { BeforeStart, Waiting, ReadyToWatch, Watching, Repeating, AddingOne, ChoosingTwist, MatchResult }
+        enum Stage { BeforeStart, Menu, Waiting, ReadyToWatch, Watching, Repeating, ComputerRepeating, AddingOne, ChoosingTwist, MatchResult }
 
+        readonly string[] names = new string[Referee.PlayerCount];
         Referee referee;
+        ComputerBrain brain;
+        PlaySetup setup;
         Stage stage = Stage.BeforeStart;
         bool paused;
-        float timeAllowed, timeLeft, nextLogAt, matchStartedAt;
+        float timeAllowed, timeUsed, nextLogAt, matchStartedAt;
         int turn;
+
+        bool Practising => setup.mode == GameMode.Practice;
 
         void Awake()
         {
-            screen.Listen(Rematch, () => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex), MatchNotes.Download);
+            screen.Listen(Rematch, GoToMenu, MatchNotes.Download);
             screen.ListenToTwists(() => DecideTwist(true), () => DecideTwist(false));
+            screen.ListenToMenu(Play);
         }
 
         // Every press comes here first. Returns true when it was used up and must not reach a pad.
@@ -40,7 +47,7 @@ namespace SimonDuel.Game
         {
             if (boot.TryStart())
             {
-                Begin(new Referee(rules.rules, (ulong)DateTime.UtcNow.Ticks));
+                GoToMenu();
                 return true;
             }
             if (paused)
@@ -62,19 +69,65 @@ namespace SimonDuel.Game
             else if (stage == Stage.AddingOne) AddStep(pad);
         }
 
+        void GoToMenu()
+        {
+            stage = Stage.Menu;
+            referee = null;
+            screen.HideResult();
+            screen.ShowMenu(true);
+        }
+
+        void Play(PlaySetup chosen)
+        {
+            setup = chosen;
+            screen.ShowMenu(false);
+            Begin(NewReferee());
+        }
+
+        Referee NewReferee()
+        {
+            ulong seed = (ulong)DateTime.UtcNow.Ticks;
+            if (!Practising) return new Referee(rules.rules, seed);
+
+            var practice = rules.rules.Copy();
+            practice.practiceAlone = true;
+            practice.noTimer = setup.practice == PracticeKind.Classic;
+            practice.twistEveryTurn = setup.practice == PracticeKind.Twists;
+            return new Referee(practice, seed, 0);
+        }
+
         void Begin(Referee match)
         {
             referee = match;
             turn = 0;
             matchStartedAt = Time.time;
-            Debug.Log($"[Duel] match starts seed={referee.Record.Seed} first=P{referee.FirstStarter + 1}");
+            brain = setup.mode == GameMode.Computer
+                ? new ComputerBrain(computerLevels.levels[setup.computerLevel], referee.Record.Seed + 1)
+                : null;
+
+            names[0] = setup.mode == GameMode.TwoPlayers ? "PLAYER 1" : "YOU";
+            names[1] = setup.mode == GameMode.Computer ? "COMPUTER" : "PLAYER 2";
+            board.SetSilent(Practising && setup.practice == PracticeKind.SightOnly);
+            screen.ShowNames(names, setup.mode == GameMode.Computer ? "C" : "2", !Practising);
             screen.HideResult();
-            StartCoroutine(PlayMatch());
+
+            Debug.Log($"[Duel] starts mode={ModeName()} seed={referee.Record.Seed} first=P{referee.FirstStarter + 1}");
+            StartCoroutine(Practising ? PlayPractice() : PlayMatch());
         }
 
         void Rematch()
         {
-            Begin(referee.Rematch());
+            Begin(Practising ? NewReferee() : referee.Rematch());
+        }
+
+        string ModeName()
+        {
+            switch (setup.mode)
+            {
+                case GameMode.Computer: return $"Computer{computerLevels.levels[setup.computerLevel].label}";
+                case GameMode.Practice: return $"Practice{setup.practice}";
+                default: return "TwoPlayers";
+            }
         }
 
         IEnumerator PlayMatch()
@@ -87,33 +140,156 @@ namespace SimonDuel.Game
             }
 
             stage = Stage.MatchResult;
-            Debug.Log($"[Duel] match over winner=P{referee.Winner + 1} score={referee.Score(0)}-{referee.Score(1)} moves={referee.Record.Moves.Count}");
-            MatchNotes.Add(MatchSummary.Build(rules.rules, referee.Record), Mathf.RoundToInt(Time.time - matchStartedAt));
-            screen.ShowResult(referee.Winner, referee.Score(0), referee.Score(1), MatchNotes.Count);
+            Debug.Log($"[Duel] match over winner={names[referee.Winner]} score={referee.Score(0)}-{referee.Score(1)} moves={referee.Record.Moves.Count}");
+
+            var summary = MatchSummary.Build(referee.Rules, referee.Record);
+            summary.mode = ModeName();
+            MatchNotes.Add(summary, Mathf.RoundToInt(Time.time - matchStartedAt));
+
+            string title = referee.Winner == 0 && setup.mode == GameMode.Computer ? "YOU WIN" : $"{names[referee.Winner]} WINS";
+            screen.ShowResult(title, referee.Winner, $"{referee.Score(0)} - {referee.Score(1)}", "REMATCH", MatchNotes.Count);
+        }
+
+        IEnumerator PlayPractice()
+        {
+            ShowPlayers(0);
+            screen.ShowBanner("CLICK WHEN READY");
+            screen.ShowLength(referee.Pattern.Count);
+            screen.ShowTimerDirection(false);
+            screen.ShowTimer(1f);
+            stage = Stage.ReadyToWatch;
+            while (stage == Stage.ReadyToWatch) yield return null;
+
+            while (referee.Phase != MatchPhase.MatchOver)
+            {
+                turn++;
+                stage = Stage.Waiting;
+                screen.ShowLength(referee.Pattern.Count);
+                screen.ShowTimerDirection(false);
+                screen.ShowTimer(1f);
+                if (referee.IncomingTwist != TwistId.None) yield return AnnounceTwist(referee.IncomingTwist);
+
+                var plan = referee.StartTurn();
+                yield return WatchAndPause(plan);
+                OpenRepeat(plan, Stage.Repeating);
+                while (stage == Stage.Repeating) yield return null;
+
+                if (referee.Phase == MatchPhase.AddOne)
+                {
+                    screen.ShowBanner("NICE!");
+                    referee.AddRandomStep();
+                    yield return new WaitForSeconds(timing.addOneHoldSeconds);
+                }
+                else
+                {
+                    yield return new WaitForSeconds(timing.rallyLossRevealSeconds);
+                }
+                yield return SlideHomeAfter(plan);
+            }
+
+            stage = Stage.MatchResult;
+            int reached = referee.Pattern.Count - 1;
+            string bestKey = $"CuzGames.Best.{setup.practice}";
+            int best = Mathf.Max(reached, PlayerPrefs.GetInt(bestKey, 0));
+            PlayerPrefs.SetInt(bestKey, best);
+            PlayerPrefs.Save();
+            Debug.Log($"[Duel] practice over kind={setup.practice} reached={reached} best={best}");
+            screen.ShowResult($"YOU REMEMBERED {reached}", 0, $"Best {best}", "AGAIN", 0);
         }
 
         IEnumerator PlayTurn()
         {
             turn++;
-            string name = $"PLAYER {referee.ActivePlayer + 1}";
+            int player = referee.ActivePlayer;
+            bool computer = setup.mode == GameMode.Computer && player == ComputerSeat;
+
             stage = Stage.Waiting;
-            ShowPlayers(referee.ActivePlayer);
+            ShowPlayers(player);
             screen.ShowLength(referee.Pattern.Count);
             screen.ShowTimerDirection(false);
             screen.ShowTimer(1f);
-            screen.ShowBanner(name);
+            screen.ShowBanner(names[player]);
             yield return new WaitForSeconds(timing.ownershipSeconds);
 
             if (referee.IncomingTwist != TwistId.None) yield return AnnounceTwist(referee.IncomingTwist);
 
-            screen.ShowBanner($"{name}: CLICK WHEN READY");
-            stage = Stage.ReadyToWatch;
-            while (stage == Stage.ReadyToWatch) yield return null;
+            if (!computer)
+            {
+                screen.ShowBanner($"{names[player]}: CLICK WHEN READY");
+                stage = Stage.ReadyToWatch;
+                while (stage == Stage.ReadyToWatch) yield return null;
+            }
 
             var plan = referee.StartTurn();
-            Debug.Log($"[Duel] turn={turn} P{plan.Player + 1} watch len={plan.Pattern.Count} twist={plan.Twist} light={plan.LightMs}ms gap={plan.GapMs}ms time={plan.TimeAllowedMs}ms");
+            Debug.Log($"[Duel] turn={turn} {names[player]} watch len={plan.Pattern.Count} twist={plan.Twist} light={plan.LightMs}ms gap={plan.GapMs}ms time={plan.TimeAllowedMs}ms");
+            yield return WatchAndPause(plan);
+
+            if (computer)
+            {
+                OpenRepeat(plan, Stage.ComputerRepeating);
+                foreach (var tap in brain.PlanTurn(plan))
+                {
+                    yield return new WaitForSeconds(tap.DelayMs / 1000f);
+                    if (stage != Stage.ComputerRepeating) break;
+                    Tap(board.Find(tap.Pad));
+                }
+            }
+            else
+            {
+                OpenRepeat(plan, Stage.Repeating);
+                while (stage == Stage.Repeating) yield return null;
+            }
+
+            if (referee.Phase == MatchPhase.AddOne)
+            {
+                screen.ShowTimerDirection(false);
+                screen.ShowTimer(1f);
+                screen.ShowBanner(computer ? "COMPUTER: ADD ONE" : "ADD ONE");
+
+                if (computer)
+                {
+                    stage = Stage.Waiting;
+                    yield return new WaitForSeconds(timing.addOneHoldSeconds);
+                    AddStep(board.Find(brain.ChooseStep(referee.Pattern)));
+                }
+                else
+                {
+                    stage = Stage.AddingOne;
+                    while (stage == Stage.AddingOne) yield return null;
+                }
+
+                ShowPlayers(plan.Player);
+                screen.ShowLength(referee.Pattern.Count);
+                yield return new WaitForSeconds(timing.addOneHoldSeconds);
+                if (referee.Phase == MatchPhase.ArmChoice) yield return OfferTwist(computer);
+            }
+            else
+            {
+                yield return new WaitForSeconds(timing.rallyLossRevealSeconds);
+                ShowPlayers(NoActivePlayer);
+                screen.ShowBanner($"POINT TO {names[referee.LastRallyWinner]}");
+                yield return new WaitForSeconds(timing.pointCelebrationSeconds);
+            }
+
+            yield return SlideHomeAfter(plan);
+        }
+
+        IEnumerator WatchAndPause(TurnPlan plan)
+        {
+            stage = Stage.Watching;
             screen.ShowBanner("WATCH");
-            yield return PlayPattern(plan);
+            bool lightsOff = Practising && setup.practice == PracticeKind.SoundOnly;
+
+            for (int i = 0; i < plan.Playback.Count; i++)
+            {
+                var pad = board.Find(plan.Playback[i]);
+                bool echoed = plan.EchoStep >= 0 && (i == plan.EchoStep || i == plan.EchoStep + 1);
+                if (lightsOff) pad.PlayToneOnly();
+                else pad.Play(plan.LightMs / 1000f, echoed ? board.TwistColor : Color.white);
+
+                float gap = i == plan.EchoStep ? timing.echoGapSeconds : plan.GapMs / 1000f;
+                yield return new WaitForSeconds(plan.LightMs / 1000f + gap);
+            }
 
             if (plan.Twist == TwistId.Shift)
             {
@@ -122,51 +298,23 @@ namespace SimonDuel.Game
                 yield return new WaitForSeconds(timing.shiftSeconds);
             }
             yield return new WaitForSeconds(timing.readyBeatSeconds);
-
-            screen.ShowBanner(RepeatWord(plan.Twist));
-            screen.ShowTimerDirection(plan.Twist == TwistId.Reverse);
-            timeAllowed = timeLeft = plan.TimeAllowedMs / 1000f;
-            nextLogAt = Time.time + 1f;
-            stage = Stage.Repeating;
-            while (stage == Stage.Repeating) yield return null;
-
-            if (referee.Phase == MatchPhase.AddOne)
-            {
-                screen.ShowTimerDirection(false);
-                screen.ShowTimer(1f);
-                screen.ShowBanner("ADD ONE");
-                stage = Stage.AddingOne;
-                while (stage == Stage.AddingOne) yield return null;
-                ShowPlayers(plan.Player);
-                screen.ShowLength(referee.Pattern.Count);
-                yield return new WaitForSeconds(timing.addOneHoldSeconds);
-                if (referee.Phase == MatchPhase.ArmChoice) yield return OfferTwist();
-            }
-            else
-            {
-                yield return new WaitForSeconds(timing.rallyLossRevealSeconds);
-                ShowPlayers(NoActivePlayer);
-                screen.ShowBanner($"POINT TO PLAYER {referee.LastRallyWinner + 1}");
-                yield return new WaitForSeconds(timing.pointCelebrationSeconds);
-            }
-
-            if (plan.Twist == TwistId.Shift)
-            {
-                board.ShiftHome(timing.shiftSeconds);
-                yield return new WaitForSeconds(timing.shiftSeconds);
-            }
         }
 
-        IEnumerator PlayPattern(TurnPlan plan)
+        void OpenRepeat(TurnPlan plan, Stage repeating)
         {
-            for (int i = 0; i < plan.Playback.Count; i++)
-            {
-                bool echoed = plan.EchoStep >= 0 && (i == plan.EchoStep || i == plan.EchoStep + 1);
-                board.Find(plan.Playback[i]).Play(plan.LightMs / 1000f, echoed ? board.TwistColor : Color.white);
+            screen.ShowBanner(RepeatWord(plan.Twist));
+            screen.ShowTimerDirection(plan.Twist == TwistId.Reverse);
+            timeAllowed = plan.TimeAllowedMs / 1000f;
+            timeUsed = 0f;
+            nextLogAt = Time.time + 1f;
+            stage = repeating;
+        }
 
-                float gap = i == plan.EchoStep ? timing.echoGapSeconds : plan.GapMs / 1000f;
-                yield return new WaitForSeconds(plan.LightMs / 1000f + gap);
-            }
+        IEnumerator SlideHomeAfter(TurnPlan plan)
+        {
+            if (plan.Twist != TwistId.Shift) yield break;
+            board.ShiftHome(timing.shiftSeconds);
+            yield return new WaitForSeconds(timing.shiftSeconds);
         }
 
         IEnumerator AnnounceTwist(TwistId twist)
@@ -217,20 +365,28 @@ namespace SimonDuel.Game
             }
         }
 
-        IEnumerator OfferTwist()
+        IEnumerator OfferTwist(bool computer)
         {
             int player = referee.ActivePlayer;
             var twist = referee.HeldTwist(player);
             stage = Stage.ChoosingTwist;
-            ShowPlayers(player, player);
-            screen.ShowBanner($"USE {TwistName(twist)} ON THE OTHER PLAYER?");
 
-            float left = timing.twistChoiceSeconds;
-            while (stage == Stage.ChoosingTwist)
+            if (computer)
             {
-                left -= Time.deltaTime;
-                if (left <= 0f) DecideTwist(false);
-                yield return null;
+                DecideTwist(brain.ShouldUseTwist(referee.Pattern.Count));
+            }
+            else
+            {
+                ShowPlayers(player, player);
+                screen.ShowBanner($"USE {TwistName(twist)} ON {names[1 - player]}?");
+
+                float left = timing.twistChoiceSeconds;
+                while (stage == Stage.ChoosingTwist)
+                {
+                    left -= Time.deltaTime;
+                    if (left <= 0f) DecideTwist(false);
+                    yield return null;
+                }
             }
 
             ShowPlayers(player);
@@ -275,9 +431,8 @@ namespace SimonDuel.Game
 
         void Tap(Pad pad)
         {
-            int ms = Mathf.RoundToInt((timeAllowed - timeLeft) * 1000f);
             int entered = referee.StepsEntered;
-            var verdict = referee.Tap(pad.Id, ms);
+            var verdict = referee.Tap(pad.Id, Mathf.RoundToInt(timeUsed * 1000f));
             if (verdict.Result == TapResult.Wrong)
             {
                 pad.ShowWrong();
@@ -301,7 +456,7 @@ namespace SimonDuel.Game
         {
             board.Find(expected).Play(timing.rallyLossRevealSeconds);
             screen.ShowBanner(word);
-            Debug.Log($"[Duel] rally ends {why} expected={expected} point=P{referee.LastRallyWinner + 1} score={referee.Score(0)}-{referee.Score(1)}");
+            Debug.Log($"[Duel] rally ends {why} expected={expected} score={referee.Score(0)}-{referee.Score(1)}");
             stage = Stage.Waiting;
         }
 
@@ -315,13 +470,16 @@ namespace SimonDuel.Game
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             PretendPlayers();
 #endif
-            if (stage != Stage.Repeating) return;
+            if (stage != Stage.Repeating && stage != Stage.ComputerRepeating) return;
 
-            timeLeft -= Time.deltaTime;
-            screen.ShowTimer(Mathf.Clamp01(timeLeft / timeAllowed));
-            if (timeLeft > 0f)
+            timeUsed += Time.deltaTime;
+            if (timeAllowed <= 0f) return;
+
+            float left = timeAllowed - timeUsed;
+            screen.ShowTimer(Mathf.Clamp01(left / timeAllowed));
+            if (left > 0f)
             {
-                LogEachSecond();
+                LogEachSecond(left);
                 return;
             }
 
@@ -330,16 +488,16 @@ namespace SimonDuel.Game
             EndRally("TOO SLOW!", expected, "timeout");
         }
 
-        void LogEachSecond()
+        void LogEachSecond(float left)
         {
             if (Time.time < nextLogAt) return;
             nextLogAt += 1f;
-            Debug.Log($"[Duel] turn={turn} P{referee.ActivePlayer + 1} len={referee.Pattern.Count} phase=Repeat taps={referee.StepsEntered}/{referee.Pattern.Count} left={timeLeft:0.0}s");
+            Debug.Log($"[Duel] turn={turn} {names[referee.ActivePlayer]} len={referee.Pattern.Count} phase=Repeat taps={referee.StepsEntered} left={left:0.0}s");
         }
 
         void OnApplicationFocus(bool hasFocus)
         {
-            if (!hasFocus && referee != null && stage != Stage.MatchResult) SetPaused(true);
+            if (!hasFocus && referee != null && stage != Stage.MatchResult && stage != Stage.Menu) SetPaused(true);
         }
 
         void SetPaused(bool pause)
@@ -379,7 +537,7 @@ namespace SimonDuel.Game
             }
             else if (keyboard.f3Key.wasPressedThisFrame && stage == Stage.Repeating)
             {
-                timeLeft = 0f;
+                timeUsed = timeAllowed;
             }
         }
 

@@ -26,6 +26,7 @@ namespace SimonDuel.Rules
     public sealed class MatchSummary
     {
         public string finishedAtUtc;
+        public string mode;
         public int seconds;
         public int winner;
         public int score0;

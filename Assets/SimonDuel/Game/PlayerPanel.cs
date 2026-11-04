@@ -15,6 +15,14 @@ namespace SimonDuel.Game
         [SerializeField] Button twistCard;
         [SerializeField] Text twistLabel;
         [SerializeField] Button keep;
+        [SerializeField] Text nameLabel;
+        [SerializeField] Text numberLabel;
+
+        public void ShowName(string playerName, string number)
+        {
+            nameLabel.text = playerName;
+            numberLabel.text = number;
+        }
 
         public void Listen(Action onUse, Action onKeep)
         {

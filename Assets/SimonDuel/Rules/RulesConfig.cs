@@ -26,5 +26,11 @@ namespace SimonDuel.Rules
         public bool chargeResetsEachRally = true;
         public bool twistsArmThemselves = false;
         public List<TwistId> twistBag = new List<TwistId> { TwistId.Reverse, TwistId.Shift, TwistId.Echo };
+
+        public bool practiceAlone = false;      // one player: no points, and the first slip ends it
+        public bool noTimer = false;
+        public bool twistEveryTurn = false;
+
+        public RulesConfig Copy() => (RulesConfig)MemberwiseClone();
     }
 }

@@ -30,6 +30,7 @@ namespace SimonDuel.Game
         float slideStart;
         float slideSeconds;
 
+        public bool Silent { get; set; }
         public PadId Id => id;
         public int Slot => slot;
         public int HomeSlot => (int)id;
@@ -117,9 +118,15 @@ namespace SimonDuel.Game
             shakePixels = shake;
             rimColor = rimTint;
             pressedAt = Time.unscaledTime;
-            tone.Stop();
-            tone.Play();
+            PlayToneOnly();
             Show(0f);
+        }
+
+        // The pad's sound with no light, for sound-only practice.
+        public void PlayToneOnly()
+        {
+            tone.Stop();
+            if (!Silent) tone.Play();
         }
 
         void Update()

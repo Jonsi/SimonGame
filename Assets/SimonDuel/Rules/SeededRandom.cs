@@ -19,6 +19,11 @@ namespace SimonDuel.Rules
             return z ^ (z >> 31);
         }
 
+        public bool Chance(double probability)
+        {
+            return NextValue() % 1000000UL < (ulong)(probability * 1000000d);
+        }
+
         public int Next(int limit)
         {
             return (int)(NextValue() % (ulong)limit);
